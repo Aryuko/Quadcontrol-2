@@ -9,6 +9,8 @@ We, togheter with Viktor Landemoo, constructed a quadcopter and attempted to bui
 Now we have a much more intimate understanding of how to utilise and design for microprocessor and inter-communication between components. With this knowledge we will make a second attempt at the software piloting the quadcopter.
 
 ## Objective and Requirments
+While we have better understanding about the software side of things, we know pretty much the same as the last time about the physics. Therefore, the main objective of this project will be to build software that can interact with all circuitery on on our quadcopter and try to pilot it. The focus will be on the software challenges (e.g. communications between connected circuits, utilising the hardware and implemeting control algorithms) and not understanding the physics required for the quadcopter to fly.
+
 
 
 ## Solution
@@ -18,6 +20,7 @@ Now we have a much more intimate understanding of how to utilise and design for 
 
 
 ## Contributions
-
+NOT NEEDED FOR THE DRAFT
 
 ## Reflections
+NOT NEEDED FOR THE DRAFT
