@@ -10,18 +10,18 @@
  * I2CxBRG = 44 = 0x2C for 400khz and PBCLK divisor of 1:2 (PBCLK = 40MHz)
  */
 
-const int BRG_VALUE_80MHz = 0x5A;
-const int BRG_VALUE_40MHz = 0x2C;
-const int BRG_VALUE_20MHz = 0x15;
-const int BRG_VALUE_10MHz = 0x09;
+#define BRG_VALUE_80MHz 0x5A
+#define BRG_VALUE_40MHz 0x2C
+#define BRG_VALUE_20MHz 0x15
+#define BRG_VALUE_10MHz 0x09
 
-const int PBCLK_80MHz = 0;
-const int PBCLK_40MHz = 1;
-const int PBCLK_20MHz = 2;
-const int PBCLK_10MHz = 3;
+#define PBCLK_80MHz 0
+#define PBCLK_40MHz 1
+#define PBCLK_20MHz 2
+#define PBCLK_10MHz 3
 
-const int PBCLK_START_INDEX = 12;
-const int PBCLK_REGISTER_MASK = 3;
+#define PBCLK_START_INDEX 12
+#define PBCLK_REGISTER_MASK 3
 
 
 /* Initialise the I2C module without starting it.
