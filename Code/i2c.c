@@ -67,3 +67,11 @@ void disableBus(void) {
 	//Stop the I2C module by clearing the ON-bit-
 	I2C1CONCLR = 0x8000;
 }
+
+void writeToSlave(char slaveAddr, char slaveReg, char data) {
+
+}
+
+char readFromSlave(char slaveAddr, char slaveReg) {
+	
+}
