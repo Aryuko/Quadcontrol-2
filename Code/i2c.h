@@ -1,5 +1,9 @@
 #pragma once
 
+/*
+ * i2c handles the communcations on the i2c bus.
+ */
+
 /* Start communicating on the I2C bus.
  *
  * Will initialise the I2C module as master in a single master enviorment and

@@ -23,7 +23,11 @@
 #define PBCLK_START_INDEX 12
 #define PBCLK_REGISTER_MASK 3
 
+#define bool char
+#define TRUE 1
+#define FALSE 0
 
+//Internal helper methods======================================================
 /* Initialise the I2C module without starting it.
  *
  * Sets up the module for operating in 400khz mode.
@@ -56,6 +60,79 @@ void initModulue(void) {
 	I2C1BRG = valueBRG;
 }
 
+/* Generates a start bus event.
+ *
+ * If the bus is idle, then will this method generates a start sequence.
+ */
+bool start(void) {
+	int stopped = I2C2STAT & 0x10;
+	if(stopped) {
+		//Set start enable bit
+		I2C2CONSET = 0x1;
+
+		//Wait for the start sequence to complete
+		//Sequence complete when the start status bit is set
+		while(!(I2C2STAT & 0x8)) {}
+	} else {
+		return FALSE;
+	}
+}
+
+/* Generates a stop bus event.
+ *
+ *
+ */
+bool stop(void) {
+	//Check that the master logic is inactive
+	if(!(I2C2CON & 0x1F)) {
+		//Master logic active
+		return FALSE;
+	}
+
+	I2C2CONSET = 0x4;
+}
+
+/* Write one byte to the I2C bus.
+ *
+ * Attempts to write one byte to the bus, and waits until the write is complete.
+ *
+ * Returns TRUE if write succesful, FALSE otherwise.
+ */
+bool writeByte(char byte) {
+	//Check if in state to send
+	int bitSTART = I2C2STAT & 0x8;
+	int bitTBF = I2C2STAT & 0x1;
+	if(bitSTART && bitTBF == TRUE) {
+		//Not in valid send state
+		return FALSE;
+	}
+
+	//Attempt to send byte
+	byte = byte & 0xFF;
+	I2C2TRN = byte;
+
+	//Check if attempt to send was succesful
+	int flagIWCOL = I2C2STAT & 0x80;	//Supposed to be 0
+	if(flagIWCOL) {
+		//IWCOL flag set, write failed. Flag needs to be cleared.
+		I2C2STATCLR = 0x80;
+		return FALSE;
+	}
+
+	//Wait for the transmit to complete
+	while(I2C2STAT & 0x4001) {}
+
+	int bitACKSTAT = I2C2STAT & 0x8000;
+	if(bitACKSTAT) {
+		//ACK not received
+		return FALSE;
+	}
+
+	//Transmit succesful
+	return TRUE;
+}
+
+//Interface methods============================================================
 void enableBus(void) {
 	initModulue();
 
@@ -69,9 +146,14 @@ void disableBus(void) {
 }
 
 void writeToSlave(char slaveAddr, char slaveReg, char data) {
-
+	start();
+	writeByte(slaveAddr);
+	writeByte(slaveReg);
+	writeByte(data);
+	stop();
 }
 
 char readFromSlave(char slaveAddr, char slaveReg) {
-	
+	bool ableToStart = start();
+
 }
