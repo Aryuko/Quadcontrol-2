@@ -1,0 +1,6 @@
+i2cStateMachine.c.o: i2cStateMachine.c \
+ /Applications/mcb32tools.app/Contents/Resources/Toolchain/include/pic32mx.h \
+ i2cModule.h
+i2cStateMachine.c :
+ /Applications/mcb32tools.app/Contents/Resources/Toolchain/include/pic32mx.h :
+ i2cModule.h :
