@@ -3,7 +3,7 @@
  */
 
 #include <pic32mx.h>
-#include "i2cModule.h"
+#include "i2cmap.h"
 
 #define UNKNOWN -2
 #define PREINIT -1
