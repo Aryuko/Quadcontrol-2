@@ -5,7 +5,7 @@ A second attempt at making software pilot a Quadcopter.
 *Date: 2016-11-05*
 
 
-*Authors: *
+*Authors:*
 
 * *Peter Kjellén, [pekj@kth.se](mailto:pekj@kth.se)*
 
