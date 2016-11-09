@@ -43,7 +43,33 @@ int state = PREINIT;
 /*
  * Lookups what value BRG should have for 400khz mode.
  */
-int lookupBRG(void) {
+int lookupBRG100(void) {
+	int PBCLK = (DEVCFG1 >> PBCLK_START_INDEX) & PBCLK_REGISTER_MASK;
+
+	int valueBRG;
+
+	switch (PBCLK) {
+		case PBCLK_80MHz:
+			valueBRG = 0x186;
+			break;
+		case PBCLK_40MHz:
+			valueBRG = 0x0C2;
+			break;
+		case PBCLK_20MHz:
+			valueBRG = 0x060;
+			break;
+		case PBCLK_10MHz:
+			valueBRG = 0x02F;
+			break;
+	}
+
+	return valueBRG;
+}
+
+/*
+ * Lookups what value BRG should have for 100khz mode.
+ */
+int lookupBRG400(void) {
 	int PBCLK = (DEVCFG1 >> PBCLK_START_INDEX) & PBCLK_REGISTER_MASK;
 
 	int valueBRG;
@@ -66,10 +92,13 @@ int lookupBRG(void) {
 	return valueBRG;
 }
 
+void clearMasterInterruptFlag(void) {
+	IFSCLR(0) = 0x80000000;
+}
+
 void waitForMasterInterrupt(void) {
-	while(MASTER_INTERRUPT_1_READ == 0) {
-		MASTER_INTERRUPT_1_CLR;
-	}
+	while(MASTER_INTERRUPT_1_READ == 0) {}
+	clearMasterInterruptFlag();
 }
 
 /*=============================================================================
@@ -85,9 +114,8 @@ int init(void) {
 	//Start initialisation
 	state = INIT;
 
-	I2C1BRG = lookupBRG();
+	I2C1BRG = lookupBRG100();
 	ON_1_SET;
-	MASTER_INTERRUPT_1_CLR;
 
 	//Transition from INIT to IDLE
 	state = IDLE;
@@ -95,9 +123,14 @@ int init(void) {
 }
 
 int start(void) {
+	clearMasterInterruptFlag();
 	//Check that we are in IDLE state
 	if(state != IDLE) {
 		return -1;
+	}
+
+	if(MASTER_INTERRUPT_1_READ == 1) {
+		return -2;
 	}
 
 	//Start generating the start bus event
@@ -106,6 +139,10 @@ int start(void) {
 
 	//Wait for the start event to finnish
 	waitForMasterInterrupt();
+
+	if(MASTER_INTERRUPT_1_READ == 1) {
+		return -3;
+	}
 
 	//Transition from START to WAIT
 	state = WAIT;
@@ -131,9 +168,14 @@ int restart(void) {
 }
 
 int stop(void) {
+	clearMasterInterruptFlag();
 	//Check that we are in WAIT state
 	if(state != WAIT) {
 		return -1;
+	}
+
+	if(MASTER_INTERRUPT_1_READ == 1) {
+		return -2;
 	}
 
 	//Start generating stop bus event
@@ -143,23 +185,42 @@ int stop(void) {
 	//Wait for the stop event to finnish
 	waitForMasterInterrupt();
 
+	if(MASTER_INTERRUPT_1_READ == 1) {
+		return -3;
+	}
+
 	//Transition from STOP to IDLE
 	state = IDLE;
 	return 0;
 }
 
 int send(char byte) {
+	clearMasterInterruptFlag();
 	//Check that we are in WAIT state
 	if(state != WAIT) {
 		return -1;
+	}
+
+	if(MASTER_INTERRUPT_1_READ == 1) {
+		return -2;
 	}
 
 	//Start sending byte
 	state = SEND;
 	I2C1TRN = byte;
 
+	if(IWCOL_1_READ) {
+		IWCOL_1_CLR;
+		state = WAIT;
+		return -4;
+	}
+
 	//Wait for the transmition to finnish
 	waitForMasterInterrupt();
+
+	if(MASTER_INTERRUPT_1_READ == 1) {
+		return -3;
+	}
 
 	//Transition from SEND to WAIT
 	state = WAIT;
@@ -198,7 +259,6 @@ int receive(void) {
  * typeACK = 1 => NACK
  */
 int generateACK(int typeACK) {
-	MASTER_INTERRUPT_1_CLR;
 	//Check that we are in WAIT state
 	if(state != WAIT) {
 		return -1;

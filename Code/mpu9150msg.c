@@ -144,6 +144,10 @@ int receiveMessage(char slaveAddress, char slaveRegister) {
 }
 
 int repeatedReceiveMessage(char slaveAddress, char slaveRegister, int* receivedBytes, int times) {
+  if(MASTER_INTERRUPT_1_READ) {
+	  return -13;
+  }
+
   if(initIfNotAllready()) {
 	  return -1;
   }
@@ -152,6 +156,8 @@ int repeatedReceiveMessage(char slaveAddress, char slaveRegister, int* receivedB
   for(i = 0; i < times; ++i) {
     receivedBytes[i] = -1;
   }
+
+  int status;
 
   if(start()) {
 	  return -2;
