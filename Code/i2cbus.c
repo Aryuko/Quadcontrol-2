@@ -5,8 +5,8 @@
 #include <pic32mx.h>
 #include "i2cmap.h"
 
-#define UNKNOWN -2
-#define PREINIT -1
+#define UNKNOWN 10
+#define PREINIT 9
 #define INIT 0
 #define IDLE 1
 #define START 2

@@ -14,6 +14,7 @@ For copyright and licensing, see file COPYING */
 #include <pic32mx.h>  /* Declarations of system-specific addresses etc */
 #include "mipslab.h"  /* Declatations for these labs */
 #include "mpu9150msg.h"
+#include "i2cbus.h"
 
 #define bool char
 
@@ -122,13 +123,11 @@ void labwork( void )
 {
 	buttons2Time();
 
-	prime = nextprime( prime );
-
 	int data[1];
-	int status = repeatedReceiveMessage(0x68, 0x75, data, 1);
-	int temp = (data[0] << 8) & data[1];
+	int status = repeatedReceiveMessage(0x69, 0x75, data, 1);
+	int temp = data[0];
 
-	display_string( 0, itoaconv( prime ) );
+	display_string(0, itoaconv(state));
 	display_string(1, itoaconv(temp));
 	display_string(2, itoaconv(status));
 	display_update();

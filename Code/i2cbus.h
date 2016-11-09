@@ -1,5 +1,7 @@
 #pragma once
 
+int state;
+
 int init(void);
 
 int start(void);
