@@ -1,6 +1,9 @@
 #include <pic32mx.h>
+#include <stdlib.h>
+#include <stdint.h>
 #include "i2cbus.h"
 #include "i2cmap.h"
+#include "mipslab.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -10,11 +13,14 @@
 
 char initialised = FALSE;
 
-void initIfNotAllready(void) {
+int initIfNotAllready(void) {
   if(!initialised) {
-    init();
+    if(init()) {
+		return -1;
+	}
     initialised = TRUE;
   }
+  return 0;
 }
 
 /*
@@ -75,7 +81,8 @@ int repeatedSendMessage(char slaveAddress, char firstSlaveRegister, char dataByt
     return -1;
   }
 
-  for(int i = 0; i < length; ++i) {
+  int i;
+  for(i = 0; i < length; ++i) {
     send(dataBytes[i]);
 
     if(ACKSTAT_1_READ == NACK) {
@@ -101,10 +108,10 @@ int receiveMessage(char slaveAddress, char slaveRegister) {
   start();
 
   //Configure address byte for send mode
-  slaveAddress = slaveAddress & ~1;
+  slaveAddress = (slaveAddress << 1);
   send(slaveAddress);
 
-  iif(ACKSTAT_1_READ == NACK) {
+  if(ACKSTAT_1_READ == NACK) {
     stop();
     return -1;
   }
@@ -136,54 +143,78 @@ int receiveMessage(char slaveAddress, char slaveRegister) {
   return receivedByte;
 }
 
-int* repeatedReceiveMessage(char slaveAddress, char slaveRegister, int times) {
-  initIfNotAllready();
+int repeatedReceiveMessage(char slaveAddress, char slaveRegister, int* receivedBytes, int times) {
+  if(initIfNotAllready()) {
+	  return -1;
+  }
 
-  int receivedBytes[times];
-
-  for(int i = 0; i < times; ++i) {
+  int i;
+  for(i = 0; i < times; ++i) {
     receivedBytes[i] = -1;
   }
 
-  start();
+  if(start()) {
+	  return -2;
+  }
 
   //Configure address byte for send mode
-  slaveAddress = slaveAddress & ~1;
-  send(slaveAddress);
-
-  iif(ACKSTAT_1_READ == NACK) {
-    stop();
-    return receivedBytes;
+  slaveAddress = (slaveAddress << 1);
+  if(send(slaveAddress)) {
+	  return -3;
   }
-
-  send(slaveRegister);
 
   if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return receivedBytes;
+    if(stop()) {
+		return -4;
+	}
+    return 1;
   }
 
-  restart();
+  if(send(slaveRegister)) {
+	  return -5;
+  }
+
+  if(ACKSTAT_1_READ == NACK) {
+	  if(stop()) {
+  		return -6;
+  	}
+    return 2;
+  }
+
+  if(restart()) {
+	  return -7;
+  }
 
   //Configure address byte for receive mode
   slaveAddress = slaveAddress | 1;
-  send(slaveAddress);
-
-  if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return receivedBytes;
+  if(send(slaveAddress)) {
+	  return -8;
   }
 
-  for(int i = 0; i < times - 1; ++i) {
+  if(ACKSTAT_1_READ == NACK) {
+	  if(stop()) {
+  		return -9;
+  	}
+    return 3;
+  }
+
+  for(i = 0; i < times - 1; ++i) {
     receivedBytes[i] = receive();
-    generateACK(ACK);
+
+    if(generateACK(ACK)) {
+		return -10;
+	}
   }
 
   receivedBytes[times - 1] = receive();
-  generateACK(NACK);
 
-  stop();
+  if(generateACK(NACK)) {
+	  return -11;
+  }
 
-  return receivedBytes;
+  if(stop()) {
+	  return -12;
+  }
 
+  return 0;
 }

@@ -1,0 +1,6 @@
+i2cbus.c.o: i2cbus.c \
+ /Applications/mcb32tools.app/Contents/Resources/Toolchain/include/pic32mx.h \
+ i2cmap.h
+i2cbus.c :
+ /Applications/mcb32tools.app/Contents/Resources/Toolchain/include/pic32mx.h :
+ i2cmap.h :

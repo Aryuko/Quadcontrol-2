@@ -66,14 +66,20 @@ int lookupBRG(void) {
 	return valueBRG;
 }
 
+void waitForMasterInterrupt(void) {
+	while(MASTER_INTERRUPT_1_READ == 0) {
+		MASTER_INTERRUPT_1_CLR;
+	}
+}
+
 /*=============================================================================
  * Interface methods
  */
 
-void init(void) {
+int init(void) {
 	//Check that we are in PREINIT state
 	if(state != PREINIT) {
-		return;
+		return -1;
 	}
 
 	//Start initialisation
@@ -81,15 +87,17 @@ void init(void) {
 
 	I2C1BRG = lookupBRG();
 	ON_1_SET;
+	MASTER_INTERRUPT_1_CLR;
 
 	//Transition from INIT to IDLE
 	state = IDLE;
+	return 0;
 }
 
-void start(void) {
+int start(void) {
 	//Check that we are in IDLE state
 	if(state != IDLE) {
-		return;
+		return -1;
 	}
 
 	//Start generating the start bus event
@@ -97,16 +105,17 @@ void start(void) {
 	SEN_1_SET;
 
 	//Wait for the start event to finnish
-	while(SEN_1_READ == 1) {}
+	waitForMasterInterrupt();
 
 	//Transition from START to WAIT
 	state = WAIT;
+	return 0;
 }
 
-void restart(void) {
+int restart(void) {
 	//Check that we are in the WAIT state
 	if(state  != WAIT) {
-		return;
+		return -1;
 	}
 
 	//Start generating the restart bus event
@@ -114,16 +123,17 @@ void restart(void) {
 	RSEN_1_SET;
 
 	//Wait for the restart event to finnish
-	while(RSEN_1_READ == 1) {}
+	waitForMasterInterrupt();
 
 	//Transition from RESTART to WAIT
 	state = WAIT;
+	return 0;
 }
 
-void stop(void) {
+int stop(void) {
 	//Check that we are in WAIT state
 	if(state != WAIT) {
-		return;
+		return -1;
 	}
 
 	//Start generating stop bus event
@@ -131,16 +141,17 @@ void stop(void) {
 	PEN_1_SET;
 
 	//Wait for the stop event to finnish
-	while(PEN_1_READ == 1) {}
+	waitForMasterInterrupt();
 
 	//Transition from STOP to IDLE
 	state = IDLE;
+	return 0;
 }
 
-void send(char byte) {
+int send(char byte) {
 	//Check that we are in WAIT state
 	if(state != WAIT) {
-		return;
+		return -1;
 	}
 
 	//Start sending byte
@@ -148,10 +159,11 @@ void send(char byte) {
 	I2C1TRN = byte;
 
 	//Wait for the transmition to finnish
-	while(TRSTAT_1_READ == 1) {}
+	waitForMasterInterrupt();
 
 	//Transition from SEND to WAIT
 	state = WAIT;
+	return 0;
 }
 
 /*
@@ -170,7 +182,7 @@ int receive(void) {
 	RCEN_1_SET;
 
 	//Wait for reception to finnish
-	while(RCEN_1_READ == 1) {}
+	waitForMasterInterrupt();
 
 	//Transition from RECEIVE to WAIT
 	state = WAIT;
@@ -185,10 +197,11 @@ int receive(void) {
  * typeACK = 0 => ACK
  * typeACK = 1 => NACK
  */
-void generateACK(int typeACK) {
+int generateACK(int typeACK) {
+	MASTER_INTERRUPT_1_CLR;
 	//Check that we are in WAIT state
 	if(state != WAIT) {
-		return;
+		return -1;
 	}
 
 	//Start generating an acknowledge event
@@ -205,8 +218,9 @@ void generateACK(int typeACK) {
 	ACKEN_1_SET;
 
 	//Wait for acknowledge generation to finnish
-	while(ACKEN_1_READ == 1) {}
+	waitForMasterInterrupt();
 
 	//Transition from ACK to WAIT
 	state = WAIT;
+	return 0;
 }

@@ -3,6 +3,12 @@
 #include <pic32mx.h>
 
 /*=============================================================================
+ * Inte Registers - Module 1
+ */
+#define MASTER_INTERRUPT_1_READ (IFS(0) >> 31) & 1
+#define MASTER_INTERRUPT_1_CLR IFSCLR(0) = 0x80000000;
+
+/*=============================================================================
  * Control Registers - Module 1
  */
 #define ON_1_READ (I2C1CON >> 15) & 1

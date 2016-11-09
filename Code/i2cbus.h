@@ -1,15 +1,15 @@
 #pragma once
 
-void init(void);
+int init(void);
 
-void start(void);
+int start(void);
 
-void restart(void);
+int restart(void);
 
-void stop(void);
+int stop(void);
 
-void send(char byte);
+int send(char byte);
 
 int recive(void);
 
-void generateACK(int typeACK);
+int generateACK(int typeACK);
