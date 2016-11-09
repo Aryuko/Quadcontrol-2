@@ -19,8 +19,6 @@ For copyright and licensing, see file COPYING */
 
 #define bool char
 
-int prime = 1234567;
-
 int mytime = 0x5957;
 int timeoutcount = 0;
 
@@ -120,28 +118,6 @@ void labinit( void )
 	return;
 }
 
-void buttons2Time ( void )
-{
-	int btns = getbtns();
-
-	if(btns) {
-		int sws = getsw();
-		//sws = sws > 9 ? 9 : sws;
-
-		if(btns & 8) {
-			mytime = (mytime & 0x0FFF) | (sws << 4*3);
-		}
-		if(btns & 4) {
-			mytime = (mytime & 0xF0FF) | (sws << 4*2);
-		}
-		if(btns & 2) {
-			mytime = (mytime & 0xFF0F) | (sws << 4*1);
-		}
-		if(btns & 1) {
-			mytime = (mytime & 0xFFF0) | (sws << 4*0);
-		}
-	}
-}
 /* This function is called repetitively from the main program */
 void labwork( void )
 {
