@@ -4,6 +4,7 @@
 
 #include <pic32mx.h>
 #include "i2cmap.h"
+#include "mipslabfunc.c"
 
 #define UNKNOWN 10
 #define PREINIT 9
@@ -29,6 +30,8 @@
 
 #define PBCLK_START_INDEX 12
 #define PBCLK_REGISTER_MASK 3
+
+int waitDuration = 150;
 
 /*=============================================================================
  * State
@@ -146,6 +149,7 @@ int start(void) {
 
 	//Transition from START to WAIT
 	state = WAIT;
+	quicksleep(waitDuration);
 	return 0;
 }
 
@@ -164,6 +168,7 @@ int restart(void) {
 
 	//Transition from RESTART to WAIT
 	state = WAIT;
+	quicksleep(waitDuration);
 	return 0;
 }
 
@@ -191,6 +196,7 @@ int stop(void) {
 
 	//Transition from STOP to IDLE
 	state = IDLE;
+	quicksleep(waitDuration);
 	return 0;
 }
 
@@ -224,6 +230,7 @@ int send(char byte) {
 
 	//Transition from SEND to WAIT
 	state = WAIT;
+	quicksleep(waitDuration);
 	return 0;
 }
 
@@ -247,6 +254,7 @@ int receive(void) {
 
 	//Transition from RECEIVE to WAIT
 	state = WAIT;
+	quicksleep(waitDuration);
 
 	//Return received byte
 	return I2C1RCV;
@@ -282,5 +290,6 @@ int generateACK(int typeACK) {
 
 	//Transition from ACK to WAIT
 	state = WAIT;
+	quicksleep(waitDuration);
 	return 0;
 }
