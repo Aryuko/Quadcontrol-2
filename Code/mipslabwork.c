@@ -93,27 +93,6 @@ void labinit( void )
 	T2CON |= 0x8000;
 
 	init();
-	/*start();
-	send(0x69);*/
-
-	/*int status1 = start();
-	quicksleep(1000000);
-	int status3 = send(0x69);
-	int status2 = stop();
-
-	display_string(0, itoaconv(status1));
-	display_string(1, itoaconv(status3));
-	display_string(2, itoaconv(status2));
-	display_update();
-
-	/*status1 = start();
-	status3 = send(0x69);
-	status2 = stop();
-
-	display_string(0, itoaconv(status1));
-	display_string(1, itoaconv(status3));
-	display_string(2, itoaconv(status2));
-	display_update();*/
 
 	return;
 }
@@ -121,36 +100,19 @@ void labinit( void )
 /* This function is called repetitively from the main program */
 void labwork( void )
 {
-
-
-
+	//Troubleshooting/Testing:
 	int status1 = start();
-	quicksleep(50);
 	int status3 = send(0x69 << 1);
 	status3 = ACKSTAT_1_READ;
-	quicksleep(150);
 	send(0x59);
-	quicksleep(150);
 	restart();
-	quicksleep(50);
 	send((0x69 << 1) + 1);
-	quicksleep(150);
 	int data = receive();
-	quicksleep(150);
 	int status2 = stop();
 
 	display_string(0, itoaconv(status1));
 	display_string(1, itoaconv(status3));
 	display_string(2, itoaconv(data));
-
-	/*int data[1];
-	int status = repeatedReceiveMessage(0x69, 0x75, data, 1);
-	int temp = data[0];
-
-	display_string(0, itoaconv(MASTER_INTERRUPT_1_READ));
-	display_string(1, itoaconv(status));
-	display_string(2, itoaconv(temp));*/
-
 
 	display_update();
 }
