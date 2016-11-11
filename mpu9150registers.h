@@ -1,4 +1,6 @@
 /*
+ * A list of register addresses on the MPU9150
+ *
  * For http://github.com/Zalodu/Quadcontrol-2
  * Author: Peter Kjellén (Zalodu)
  * Date: 11/11/16

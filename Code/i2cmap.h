@@ -1,4 +1,12 @@
-#pragma once
+/*
+ * Definitions for interacting with the first I2C module.
+ *
+ * For http://github.com/Zalodu/Quadcontrol-2
+ * Author: Jesper Larsson (MrLarssonJr)
+ * Date: 11/11/16
+ */
+
+ #pragma once
 
 #include <pic32mx.h>
 

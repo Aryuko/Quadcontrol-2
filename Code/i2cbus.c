@@ -1,6 +1,10 @@
-/*
- * A simple interface for the I2C bus.
- */
+ /*
+  * A simple interface for the I2C bus.
+  *
+  * For http://github.com/Zalodu/Quadcontrol-2
+  * Author: Jesper Larsson (MrLarssonJr)
+  * Date: 11/11/16
+  */
 
 #include <pic32mx.h>
 #include <stdint.h>
