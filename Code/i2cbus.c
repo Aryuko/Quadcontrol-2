@@ -31,7 +31,7 @@
 #define PBCLK_START_INDEX 12
 #define PBCLK_REGISTER_MASK 3
 
-int waitDuration = 150;
+const int waitDuration = 150;
 
 /*=============================================================================
  * State
