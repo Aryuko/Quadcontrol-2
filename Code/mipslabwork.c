@@ -104,7 +104,7 @@ void labwork( void )
 	int status1 = start();
 	int status3 = send(0x69 << 1);
 	status3 = ACKSTAT_1_READ;
-	send(0x59);
+	send(0x75);
 	restart();
 	send((0x69 << 1) + 1);
 	int data = receive();
