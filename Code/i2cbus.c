@@ -127,14 +127,9 @@ int init(void) {
 }
 
 int start(void) {
-	clearMasterInterruptFlag();
 	//Check that we are in IDLE state
 	if(state != IDLE) {
 		return -1;
-	}
-
-	if(MASTER_INTERRUPT_1_READ == 1) {
-		return -2;
 	}
 
 	//Start generating the start bus event
@@ -142,15 +137,10 @@ int start(void) {
 	SEN_1_SET;
 
 	//Wait for the start event to finnish
-	waitForMasterInterrupt();
-
-	if(MASTER_INTERRUPT_1_READ == 1) {
-		return -3;
-	}
+	quicksleep(waitDuration);
 
 	//Transition from START to WAIT
 	state = WAIT;
-	quicksleep(waitDuration);
 	return 0;
 }
 
@@ -165,23 +155,17 @@ int restart(void) {
 	RSEN_1_SET;
 
 	//Wait for the restart event to finnish
-	waitForMasterInterrupt();
+	quicksleep(waitDuration);
 
 	//Transition from RESTART to WAIT
 	state = WAIT;
-	quicksleep(waitDuration);
 	return 0;
 }
 
 int stop(void) {
-	clearMasterInterruptFlag();
 	//Check that we are in WAIT state
 	if(state != WAIT) {
 		return -1;
-	}
-
-	if(MASTER_INTERRUPT_1_READ == 1) {
-		return -2;
 	}
 
 	//Start generating stop bus event
@@ -189,27 +173,17 @@ int stop(void) {
 	PEN_1_SET;
 
 	//Wait for the stop event to finnish
-	waitForMasterInterrupt();
-
-	if(MASTER_INTERRUPT_1_READ == 1) {
-		return -3;
-	}
+	quicksleep(waitDuration);
 
 	//Transition from STOP to IDLE
 	state = IDLE;
-	quicksleep(waitDuration);
 	return 0;
 }
 
 int send(char byte) {
-	clearMasterInterruptFlag();
 	//Check that we are in WAIT state
 	if(state != WAIT) {
 		return -1;
-	}
-
-	if(MASTER_INTERRUPT_1_READ == 1) {
-		return -2;
 	}
 
 	//Start sending byte
@@ -223,15 +197,10 @@ int send(char byte) {
 	}
 
 	//Wait for the transmition to finnish
-	waitForMasterInterrupt();
-
-	if(MASTER_INTERRUPT_1_READ == 1) {
-		return -3;
-	}
+	quicksleep(waitDuration);
 
 	//Transition from SEND to WAIT
 	state = WAIT;
-	quicksleep(waitDuration);
 	return 0;
 }
 
@@ -251,11 +220,10 @@ int receive(void) {
 	RCEN_1_SET;
 
 	//Wait for reception to finnish
-	waitForMasterInterrupt();
+	quicksleep(waitDuration);
 
 	//Transition from RECEIVE to WAIT
 	state = WAIT;
-	quicksleep(waitDuration);
 
 	//Return received byte
 	return I2C1RCV;
@@ -287,10 +255,9 @@ int generateACK(int typeACK) {
 	ACKEN_1_SET;
 
 	//Wait for acknowledge generation to finnish
-	waitForMasterInterrupt();
+	quicksleep(waitDuration);
 
 	//Transition from ACK to WAIT
 	state = WAIT;
-	quicksleep(waitDuration);
 	return 0;
 }
