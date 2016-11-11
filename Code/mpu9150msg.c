@@ -13,60 +13,28 @@
 
 char initialised = FALSE;
 
-int initIfNotAllready(void) {
+/*
+ * Initialise the I2C bus, if it isn't already.
+ */
+void initIfNotAllready(void) {
   if(!initialised) {
-    if(init()) {
-		return -1;
-	}
+    init();
     initialised = TRUE;
   }
-  return 0;
 }
 
 /*
- * Send a byte message over the I2C bus.
+ * Performs an Burst Write Sequence to a MPU9150 device.
  *
- * Returns -1 if a part of the message was not acknowledged, 1 otherwise.
+ * Returns 0 if successfull, -1 if not.
  */
-int sendMessage(char slaveAddress, char slaveRegister, char dataByte) {
-  initIfNotAllready();
-
-  start();
-
-  //Configure address byte for send mode
-  slaveAddress = slaveAddress & (~1);
-  send(slaveAddress);
-
-  if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return -1;
-  }
-
-  send(slaveRegister);
-
-  if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return -1;
-  }
-
-  send(dataByte);
-
-  if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return -1;
-  }
-
-  stop();
-  return 1;
-}
-
 int repeatedSendMessage(char slaveAddress, char firstSlaveRegister, char dataBytes[], int length) {
   initIfNotAllready();
 
   start();
 
   //Configure address byte for send mode
-  slaveAddress = slaveAddress & (~1);
+  slaveAddress = slaveAddress << 1;
   send(slaveAddress);
 
   if(ACKSTAT_1_READ == NACK) {
@@ -92,18 +60,34 @@ int repeatedSendMessage(char slaveAddress, char firstSlaveRegister, char dataByt
   }
 
   stop();
-  return 1;
+  return 0;
 }
 
 /*
- * Receive a byte message over the I2C bus.
+ * Send a message byte to a MPU9150 device.
  *
- * Returns the byte received if successfull, -1 otherwise.
+ * Returns 0 if successfull, -1 if not.
  */
-int receiveMessage(char slaveAddress, char slaveRegister) {
+int sendMessage(char slaveAddress, char slaveRegister, char dataByte) {
+	char dataBytes[] = {dataByte};
+
+	return repeatedSendMessage(slaveAddress, slaveRegister, dataBytes, 1);
+}
+
+/*
+ * Performs a Burst Read Sequence to a MPU9150 device.
+ *
+ * Returns 1 if successfull, -1 otherwise.
+ */
+int repeatedReceiveMessage(char slaveAddress, char slaveRegister, int* receivedBytes, int times) {
   initIfNotAllready();
 
-  int receivedByte;
+  int i;
+  for(i = 0; i < times; ++i) {
+    receivedBytes[i] = -1;
+  }
+
+  int status;
 
   start();
 
@@ -113,14 +97,14 @@ int receiveMessage(char slaveAddress, char slaveRegister) {
 
   if(ACKSTAT_1_READ == NACK) {
     stop();
-    return -1;
+    return 1;
   }
 
   send(slaveRegister);
 
   if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return -1;
+	stop();
+    return 2;
   }
 
   restart();
@@ -130,97 +114,34 @@ int receiveMessage(char slaveAddress, char slaveRegister) {
   send(slaveAddress);
 
   if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return -1;
-  }
-
-  receivedByte = receive();
-
-  generateACK(NACK);
-
-  stop();
-
-  return receivedByte;
-}
-
-int repeatedReceiveMessage(char slaveAddress, char slaveRegister, int* receivedBytes, int times) {
-  if(MASTER_INTERRUPT_1_READ) {
-	  return -13;
-  }
-
-  if(initIfNotAllready()) {
-	  return -1;
-  }
-
-  int i;
-  for(i = 0; i < times; ++i) {
-    receivedBytes[i] = -1;
-  }
-
-  int status;
-
-  if(start()) {
-	  return -2;
-  }
-
-  //Configure address byte for send mode
-  slaveAddress = (slaveAddress << 1);
-  if(send(slaveAddress)) {
-	  return -3;
-  }
-
-  if(ACKSTAT_1_READ == NACK) {
-    if(stop()) {
-		return -4;
-	}
-    return 1;
-  }
-
-  if(send(slaveRegister)) {
-	  return -5;
-  }
-
-  if(ACKSTAT_1_READ == NACK) {
-	  if(stop()) {
-  		return -6;
-  	}
-    return 2;
-  }
-
-  if(restart()) {
-	  return -7;
-  }
-
-  //Configure address byte for receive mode
-  slaveAddress = slaveAddress | 1;
-  if(send(slaveAddress)) {
-	  return -8;
-  }
-
-  if(ACKSTAT_1_READ == NACK) {
-	  if(stop()) {
-  		return -9;
-  	}
+	stop();
     return 3;
   }
 
   for(i = 0; i < times - 1; ++i) {
     receivedBytes[i] = receive();
 
-    if(generateACK(ACK)) {
-		return -10;
-	}
+    generateACK(ACK);
   }
 
   receivedBytes[times - 1] = receive();
 
-  if(generateACK(NACK)) {
-	  return -11;
-  }
+  generateACK(NACK);
 
-  if(stop()) {
-	  return -12;
-  }
+  stop();
 
   return 0;
+}
+
+/*
+ * Receive a message byte to a MPU9150 device.
+ *
+ * Returns 1 if successfull, -1 otherwise.
+ */
+int receiveMessage(char slaveAddress, char slaveRegister) {
+  int receivedByte[] = {-1};
+
+  repeatedReceiveMessage(slaveAddress, slaveRegister, receivedByte, 1);
+
+  return receivedByte[0];
 }
