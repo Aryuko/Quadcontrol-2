@@ -13,48 +13,14 @@
 
 char initialised = FALSE;
 
+/*
+ * Initialise the I2C bus, if it isn't already.
+ */
 void initIfNotAllready(void) {
   if(!initialised) {
     init();
     initialised = TRUE;
   }
-}
-
-/*
- * Send a byte message over the I2C bus.
- *
- * Returns -1 if a part of the message was not acknowledged, 1 otherwise.
- */
-int sendMessage(char slaveAddress, char slaveRegister, char dataByte) {
-  initIfNotAllready();
-
-  start();
-
-  //Configure address byte for send mode
-  slaveAddress = slaveAddress << 1;
-  send(slaveAddress);
-
-  if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return -1;
-  }
-
-  send(slaveRegister);
-
-  if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return -1;
-  }
-
-  send(dataByte);
-
-  if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return -1;
-  }
-
-  stop();
-  return 1;
 }
 
 /*
