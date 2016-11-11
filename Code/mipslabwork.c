@@ -17,6 +17,7 @@ For copyright and licensing, see file COPYING */
 #include "i2cbus.h"
 #include "i2cmap.h"
 #include "i2caddresses.h"
+#include "mpu9150registers.h"
 
 #define bool char
 
@@ -99,7 +100,7 @@ void labinit( void )
 /* This function is called repetitively from the main program */
 void labwork( void )
 {
-	int data = receiveMessage(MPU6150, 0x75);
+	int data = receiveMessage(MPU6150, WHO_AM_I);
 
 	//display_string(0, );
 	//display_string(1, );
