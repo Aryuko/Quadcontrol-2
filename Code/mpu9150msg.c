@@ -69,7 +69,7 @@ int repeatedSendMessage(char slaveAddress, char firstSlaveRegister, char dataByt
  * Returns 0 if successfull, -1 if not.
  */
 int sendMessage(char slaveAddress, char slaveRegister, char dataByte) {
-	int dataBytes[] = {dataByte};
+	char dataBytes[] = {dataByte};
 
 	return repeatedSendMessage(slaveAddress, slaveRegister, dataBytes, 1);
 }
