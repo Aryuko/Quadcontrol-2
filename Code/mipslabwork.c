@@ -92,26 +92,16 @@ void labinit( void )
 	// Start Timer 2
 	T2CON |= 0x8000;
 
-	init();
-
 	return;
 }
 
 /* This function is called repetitively from the main program */
 void labwork( void )
 {
-	//Troubleshooting/Testing:
-	int status1 = start();
-	int status3 = send(0x69 << 1);
-	status3 = ACKSTAT_1_READ;
-	send(0x75);
-	restart();
-	send((0x69 << 1) + 1);
-	int data = receive();
-	int status2 = stop();
+	int data = receiveMessage(0x69, 0x75);
 
-	display_string(0, itoaconv(status1));
-	display_string(1, itoaconv(status3));
+	//display_string(0, );
+	//display_string(1, );
 	display_string(2, itoaconv(data));
 
 	display_update();
