@@ -3,8 +3,9 @@
  */
 
 #include <pic32mx.h>
+#include <stdint.h>
 #include "i2cmap.h"
-#include "mipslabfunc.c"
+#include "mipslab.h"
 
 #define UNKNOWN 10
 #define PREINIT 9
