@@ -18,6 +18,7 @@ For copyright and licensing, see file COPYING */
 #include "i2cmap.h"
 #include "i2caddresses.h"
 #include "mpu9150registers.h"
+#include "mpu9150interface.h"
 
 #define bool char
 
@@ -94,7 +95,7 @@ void labinit( void )
 	// Start Timer 2
 	T2CON |= 0x8000;
 
-	sendMessage(MPU6150, POWER_MGMT_1, 0);
+	awakenMPU9150();
 
 	return;
 }
