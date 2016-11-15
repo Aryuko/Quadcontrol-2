@@ -102,12 +102,16 @@ void labinit( void )
 /* This function is called repetitively from the main program */
 void labwork( void )
 {
-	int who = receiveMessage(MPU6150, WHO_AM_I);
-	int accxl = receiveMessage(MPU6150, ACCEL_XOUT_L);
-	int accxh = receiveMessage(MPU6150, ACCEL_XOUT_H);
+	int who;
+	receiveMessage(MPU6150, WHO_AM_I, &who);
+
+	int accxl;
+	receiveMessage(MPU6150, ACCEL_XOUT_L, &accxl);
+
+	int accxh;
+	receiveMessage(MPU6150, ACCEL_XOUT_H, &accxh);
 
 	//display_string(0, );
-	//display_string(1, );
 	display_string(1, itoaconv((accxh << 8) | accxl));
 	display_string(2, itoaconv(who));
 

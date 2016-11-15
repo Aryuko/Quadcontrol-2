@@ -77,7 +77,7 @@ int sendMessage(char slaveAddress, char slaveRegister, char dataByte) {
 /*
  * Performs a Burst Read Sequence to a MPU9150 device.
  *
- * Returns 1 if successfull, -1 otherwise.
+ * Returns 0 if successfull, -1 otherwise.
  */
 int repeatedReceiveMessage(char slaveAddress, char slaveRegister, int* receivedBytes, int times) {
   initIfNotAllready();
@@ -136,12 +136,15 @@ int repeatedReceiveMessage(char slaveAddress, char slaveRegister, int* receivedB
 /*
  * Receive a message byte to a MPU9150 device.
  *
- * Returns 1 if successfull, -1 otherwise.
+ * Returns 0 if successfull, -1 otherwise.
  */
-int receiveMessage(char slaveAddress, char slaveRegister) {
-  int receivedByte[] = {-1};
+int receiveMessage(char slaveAddress, char slaveRegister, int* receivedByte) {
+  int receivedBytes[1];
 
-  repeatedReceiveMessage(slaveAddress, slaveRegister, receivedByte, 1);
-
-  return receivedByte[0];
+  if (repeatedReceiveMessage(slaveAddress, slaveRegister, receivedBytes, 1)){
+	  return -1;
+  }
+  
+  *receivedByte = receivedBytes[0];
+  return 0;
 }

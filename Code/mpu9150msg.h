@@ -26,4 +26,4 @@ int repeatedReceiveMessage(char slaveAddress, char slaveRegister, int* receivedB
  *
  * Returns 1 if successfull, -1 otherwise.
  */
-int receiveMessage(char slaveAddress, char slaveRegister);
+int receiveMessage(char slaveAddress, char slaveRegister, int* receivedByte);
