@@ -9,3 +9,7 @@
 #pragma once
 
 int setupMPU9150(void);
+
+int awakenMPU9150(void);
+
+int sleepMPU9150(void);
