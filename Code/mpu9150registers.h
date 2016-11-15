@@ -8,7 +8,16 @@
 
 #pragma once
 
+#define CONFIG 0x1A
+#define GYRO_CONFIG 0x1B
+#define ACCEL_CONFIG 0x1C
+
+#define MOT_THR 0x1F
+#define MOT_DUR 0x20
+
 #define FIFO_EN 0x23
+
+#define INT_PIN_CFG 0x37
 
 #define ACCEL_XOUT_H 0x3B
 #define ACCEL_XOUT_L 0x3C
