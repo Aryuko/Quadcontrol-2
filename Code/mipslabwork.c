@@ -95,6 +95,7 @@ void labinit( void )
 	// Start Timer 2
 	T2CON |= 0x8000;
 
+	setupMPU9150();
 	awakenMPU9150();
 
 	return;
@@ -106,14 +107,18 @@ void labwork( void )
 	int who;
 	receiveMessage(MPU6150, WHO_AM_I, &who);
 
+	int accx = ~0 << 16;
+
 	int accxl;
 	receiveMessage(MPU6150, ACCEL_XOUT_L, &accxl);
 
 	int accxh;
 	receiveMessage(MPU6150, ACCEL_XOUT_H, &accxh);
 
+	accx = accx | ((accxh << 8) | accxl);
+
 	//display_string(0, );
-	display_string(1, itoaconv((accxh << 8) | accxl));
+	display_string(1, itoaconv(accx));
 	display_string(2, itoaconv(who));
 
 	display_update();
