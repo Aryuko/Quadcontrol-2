@@ -94,17 +94,22 @@ void labinit( void )
 	// Start Timer 2
 	T2CON |= 0x8000;
 
+	sendMessage(MPU6150, POWER_MGMT_1, 0);
+
 	return;
 }
 
 /* This function is called repetitively from the main program */
 void labwork( void )
 {
-	int data = receiveMessage(MPU6150, WHO_AM_I);
+	int who = receiveMessage(MPU6150, WHO_AM_I);
+	int accxl = receiveMessage(MPU6150, ACCEL_XOUT_L);
+	int accxh = receiveMessage(MPU6150, ACCEL_XOUT_H);
 
 	//display_string(0, );
 	//display_string(1, );
-	display_string(2, itoaconv(data));
+	display_string(1, itoaconv((accxh << 8) | accxl));
+	display_string(2, itoaconv(who));
 
 	display_update();
 }
