@@ -112,3 +112,34 @@ int getAccelValues (int* values) {
 	values = data;
 	return 0;
 }
+
+/*
+ * Fetches and returns the gyroscope values from the MPU9150.
+ * The x, y, and z values of the gyroscope are added in order to the
+ * specified pointer/array.
+ *
+ * Returns 0 if successfull, -1 otherwise
+ */
+int getGyroValues (int* values) {
+	int data[3];
+	int valueL;
+	int valueH;
+
+	//Gyroscope x
+	if (receiveMessage(MPU6150, GYRO_XOUT_L, &valueL)) { return -1; }
+	if (receiveMessage(MPU6150, GYRO_XOUT_H, &valueH)) { return -1; }
+	data[0] = (valueH << 8) | valueL;
+
+	//Gyroscope y
+	if (receiveMessage(MPU6150, GYRO_YOUT_L, &valueL)) { return -1; }
+	if (receiveMessage(MPU6150, GYRO_YOUT_H, &valueH)) { return -1; }
+	data[1] = (valueH << 8) | valueL;
+
+	//Gyroscope z
+	if (receiveMessage(MPU6150, GYRO_ZOUT_L, &valueL)) { return -1; }
+	if (receiveMessage(MPU6150, GYRO_ZOUT_H, &valueH)) { return -1; }
+	data[2] = (valueH << 8) | valueL;
+
+	values = data;
+	return 0;
+}
