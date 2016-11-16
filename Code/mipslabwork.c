@@ -104,22 +104,19 @@ void labinit( void )
 /* This function is called repetitively from the main program */
 void labwork( void )
 {
-	int who;
-	receiveMessage(MPU6150, WHO_AM_I, &who);
+/* Attempt at format conversion:
 
 	int accx = ~0 << 16;
-
-	int accxl;
-	receiveMessage(MPU6150, ACCEL_XOUT_L, &accxl);
-
-	int accxh;
-	receiveMessage(MPU6150, ACCEL_XOUT_H, &accxh);
-
 	accx = accx | ((accxh << 8) | accxl);
-
-	//display_string(0, );
-	display_string(1, itoaconv(accx));
-	display_string(2, itoaconv(who));
+*/
+	int gyroValues[3];
+	if(getGyroValues(gyroValues)) {
+		display_string(0, "it didn't work");
+	} else {
+		display_string(0, itoaconv(gyroValues[0]));
+		display_string(1, itoaconv(gyroValues[1]));
+		display_string(2, itoaconv(gyroValues[2]));
+	}
 
 	display_update();
 }
