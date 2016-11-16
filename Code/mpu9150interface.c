@@ -3,7 +3,7 @@
  *
  * For http://github.com/Zalodu/Quadcontrol-2
  * Author: Peter Kjellén (Zalodu)
- * Date: 15/11/16
+ * Date: 16/11/16
  */
 
 #include <stdint.h>   /* Declarations of uint_32 and the like */
@@ -79,5 +79,36 @@ int sleepMPU9150 (void) {
 	if (sendMessage(MPU6150, POWER_MGMT_1, data)){
 		return -1;
 	}
+	return 0;
+}
+
+/*
+ * Fetches and returns the accelerometer values from the MPU9150.
+ * The x, y, and z values of the accelerometer are added in order to the
+ * specified pointer/array.
+ *
+ * Returns 0 if successfull, -1 otherwise
+ */
+int getAccelValues (int* values) {
+	int data[3];
+	int valueL;
+	int valueH;
+
+	//Accelerometer x
+	if (receiveMessage(MPU6150, ACCEL_XOUT_L, &valueL)) { return -1; }
+	if (receiveMessage(MPU6150, ACCEL_XOUT_H, &valueH)) { return -1; }
+	data[0] = (valueH << 8) | valueL;
+
+	//Accelerometer y
+	if (receiveMessage(MPU6150, ACCEL_YOUT_L, &valueL)) { return -1; }
+	if (receiveMessage(MPU6150, ACCEL_YOUT_H, &valueH)) { return -1; }
+	data[1] = (valueH << 8) | valueL;
+
+	//Accelerometer z
+	if (receiveMessage(MPU6150, ACCEL_ZOUT_L, &valueL)) { return -1; }
+	if (receiveMessage(MPU6150, ACCEL_ZOUT_H, &valueH)) { return -1; }
+	data[2] = (valueH << 8) | valueL;
+
+	values = data;
 	return 0;
 }
