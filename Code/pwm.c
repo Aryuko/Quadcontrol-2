@@ -180,19 +180,19 @@ void pwm_setDutyCycle(int module, double proportion) {
 
 	switch (module) {
 		case 1: {
-			OC1RS = newDutyCycle + 0.5;
+			OC1RS = newDutyCycle;
 			break;
 		}
 		case 2: {
-			OC2RS = newDutyCycle + 0.5;
+			OC2RS = newDutyCycle;
 			break;
 		}
 		case 3: {
-			OC3RS = newDutyCycle + 0.5;
+			OC3RS = newDutyCycle;
 			break;
 		}
 		case 4: {
-			OC4RS = newDutyCycle + 0.5;
+			OC4RS = newDutyCycle;
 			break;
 		}
 	}
