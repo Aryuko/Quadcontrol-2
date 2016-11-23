@@ -19,6 +19,7 @@ For copyright and licensing, see file COPYING */
 #include "i2caddresses.h"
 #include "mpu9150registers.h"
 #include "mpu9150interface.h"
+#include "pwm.h"
 
 #define bool char
 
@@ -88,15 +89,11 @@ void labinit( void )
 	*((volatile int*) TRISD) |= 0x7F0;
 	*((volatile int*) TRISF) |= 2;
 
-	// Init timer using period = 8E06/256/10 = 31250, for 10 updates per second
-	initTimer2(31250);
 	enable_interrupts();
 
-	// Start Timer 2
-	T2CON |= 0x8000;
+	pwm_initTimer();
+	pwm_initModule(1);
 
-	MPU9150_setup();
-	MPU9150_awaken();
 
 	return;
 }

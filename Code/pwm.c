@@ -69,7 +69,7 @@
 #define OC4RSSET		PIC32_R (0x3628)
 #define OC4RSINV		PIC32_R (0x362c)
 
-const int period = 0x00C7;
+const int period = 0x0C35;
 
 
 /*
