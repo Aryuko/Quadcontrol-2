@@ -13,7 +13,7 @@
 #include "i2caddresses.h"
 
 //Digital Low Pass Filter, 0-7
-char DLPF = 0;
+char DLPF = 6;
 
 //Clock source, 0-7
 char clockSource = 1;
@@ -22,7 +22,7 @@ char clockSource = 1;
 char gyroScale = 3;
 
 //Accelerometer range scale, 0-3
-char accelScale = 0;
+char accelScale = 3;
 
 
 /*
@@ -98,33 +98,69 @@ int sleepMPU9150 (void) {
 }
 
 /*
+ * Converts the given relative value to degrees.
+ *
+ * Returns the given value converted to degrees.
+ */
+double convertToDegrees (int a) {
+	//32767(0x7FFF) => "fullScale" degrees
+ 	double fullScale = 250;
+
+	//fullScale = 250*2^gyroScale
+	//since fullScale is 250/500/1000/2000
+	char i;
+	for (i = 0; i < gyroScale; i++) {
+		fullScale *= 2;
+	}
+
+	return a * (fullScale/(double)0x7FFF);
+ }
+
+ /*
+  * Converts the given relative value to newtons.
+  *
+  * Returns the given value converted to newtons.
+  */
+ double convertToNewtons (int a) {
+ 	//32767(0x7FFF) => "fullScale" g forces
+  	double fullScale = 2;
+
+ 	//fullScale = 2*2^accelScale
+ 	//Since fullScale is 2/4/8/16
+ 	char i;
+ 	for (i = 0; i < accelScale; i++) {
+ 		fullScale *= 2;
+ 	}
+
+ 	return a * (fullScale/(double)0x7FFF) * 9.80665;
+  }
+
+/*
  * Fetches and returns the accelerometer values from the MPU9150.
  * The x, y, and z values of the accelerometer are added in order to the
  * specified pointer/array.
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int getAccelValues (int* values) {
-	int data[3];
+int getAccelValues (double* values) {
 	int valueL;
 	int valueH;
 
 	//Accelerometer x
 	if (receiveMessage(MPU6150, ACCEL_XOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, ACCEL_XOUT_H, &valueH)) { return -1; }
-	data[0] = (valueH << 8) | valueL;
+	values[0] = convertToNewtons(signExtend16To32((valueH << 8) | valueL));
 
 	//Accelerometer y
 	if (receiveMessage(MPU6150, ACCEL_YOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, ACCEL_YOUT_H, &valueH)) { return -1; }
-	data[1] = (valueH << 8) | valueL;
+	values[1] = convertToNewtons(signExtend16To32((valueH << 8) | valueL));
 
 	//Accelerometer z
 	if (receiveMessage(MPU6150, ACCEL_ZOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, ACCEL_ZOUT_H, &valueH)) { return -1; }
-	data[2] = (valueH << 8) | valueL;
+	values[2] = convertToNewtons(signExtend16To32((valueH << 8) | valueL));
 
-	values = data;
 	return 0;
 }
 
@@ -135,24 +171,24 @@ int getAccelValues (int* values) {
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int getGyroValues (int* values) {
+int getGyroValues (double* values) {
 	int valueL;
 	int valueH;
 
 	//Gyroscope x
 	if (receiveMessage(MPU6150, GYRO_XOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, GYRO_XOUT_H, &valueH)) { return -1; }
-	values[0] = signExtend16To32((valueH << 8) | valueL);
+	values[0] = convertToDegrees(signExtend16To32((valueH << 8) | valueL));
 
 	//Gyroscope y
 	if (receiveMessage(MPU6150, GYRO_YOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, GYRO_YOUT_H, &valueH)) { return -1; }
-	values[1] = signExtend16To32((valueH << 8) | valueL);
+	values[1] = convertToDegrees(signExtend16To32((valueH << 8) | valueL));
 
 	//Gyroscope z
 	if (receiveMessage(MPU6150, GYRO_ZOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, GYRO_ZOUT_H, &valueH)) { return -1; }
-	values[2] = signExtend16To32((valueH << 8) | valueL);
+	values[2] = convertToDegrees(signExtend16To32((valueH << 8) | valueL));
 
 	return 0;
 }

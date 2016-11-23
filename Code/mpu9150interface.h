@@ -14,6 +14,6 @@ int awakenMPU9150(void);
 
 int sleepMPU9150(void);
 
-int getAccelValues(int* values);
+int getAccelValues(double* values);
 
-int getGyroValues(int* values);
+int getGyroValues(double* values);
