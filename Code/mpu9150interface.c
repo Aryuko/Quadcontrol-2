@@ -19,7 +19,7 @@ char DLPF = 0;
 char clockSource = 1;
 
 //Gyroscope range scale, 0-3
-char gyroScale = 0;
+char gyroScale = 3;
 
 //Accelerometer range scale, 0-3
 char accelScale = 0;
