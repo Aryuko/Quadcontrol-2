@@ -13,13 +13,16 @@
 #include "i2caddresses.h"
 
 //Digital Low Pass Filter, 0-7
-char DLPF = 0;
+char DLPF = 6;
+
+//Clock source, 0-7
+char clockSource = 1;
 
 //Gyroscope range scale, 0-3
-char gyroScale = 0;
+char gyroScale = 3;
 
 //Accelerometer range scale, 0-3
-char accelScale = 0;
+char accelScale = 3;
 
 
 /*
@@ -27,23 +30,28 @@ char accelScale = 0;
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int setupMPU9150 (void) {
+int MPU9150_setup (void) {
+	int data;
+
 	//Setup Digital Low Pass Filter, EXT_SYNC_SET is ignored
-	if(sendMessage(MPU6150, CONFIG, DLPF)){
-		return -1;
-	}
+	if (receiveMessage(MPU6150, CONFIG, &data)) { return -1; }
+	char sendData = (data & 0xF8) | DLPF;
+	if(sendMessage(MPU6150, CONFIG, sendData)) { return -1; }
+
+	//Setup clock source
+	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) { return -1; }
+	sendData = (data & 0xF8) | clockSource;
+	if(sendMessage(MPU6150, POWER_MGMT_1, sendData)) { return -1; }
+
 
 	//Setup gyroscope config
-	int gyroConfig = gyroScale << 3;
-	if(sendMessage(MPU6150, GYRO_CONFIG, gyroConfig)){
-		return -1;
-	}
+	sendData = gyroScale << 3;
+	if(sendMessage(MPU6150, GYRO_CONFIG, sendData)) { return -1; }
 
 	//Setup accellerometer config
-	int accelConfig = accelScale << 3;
-	if(sendMessage(MPU6150, ACCEL_CONFIG, accelConfig)){
-		return -1;
-	}
+	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) { return -1; }
+	sendData = (data & 0x18) | (accelScale << 3);
+	if(sendMessage(MPU6150, ACCEL_CONFIG, sendData)) { return -1; }
 }
 
 /*
@@ -51,16 +59,12 @@ int setupMPU9150 (void) {
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int awakenMPU9150 (void) {
+int MPU9150_awaken (void) {
 	int data;
-	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)){
-		return -1;
-	}
+	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) {	return -1; }
 
 	data = data & ~(1 << 6);
-	if (sendMessage(MPU6150, POWER_MGMT_1, data)){
-		return -1;
-	}
+	if (sendMessage(MPU6150, POWER_MGMT_1, data)) {	return -1; }
 	return 0;
 }
 
@@ -69,17 +73,60 @@ int awakenMPU9150 (void) {
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int sleepMPU9150 (void) {
+int MPU9150_sleep (void) {
 	int data;
-	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)){
-		return -1;
-	}
+	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) {	return -1; }
 
 	data = data | (1 << 6);
-	if (sendMessage(MPU6150, POWER_MGMT_1, data)){
-		return -1;
-	}
+	if (sendMessage(MPU6150, POWER_MGMT_1, data)) {	return -1; }
 	return 0;
+}
+
+/*
+ * Converts the given relative value to degrees.
+ *
+ * Returns the given value converted to degrees.
+ */
+double convertToDegrees (int a) {
+	//32767(0x7FFF) => "fullScale" degrees
+ 	double fullScale = 250;
+
+	//fullScale = 250*2^gyroScale
+	//since fullScale is 250/500/1000/2000
+	char i;
+	for (i = 0; i < gyroScale; i++) {
+		fullScale *= 2;
+	}
+
+	return a * (fullScale/(double)0x7FFF);
+ }
+
+/*
+ * Converts the given relative value to newtons.
+ *
+ * Returns the given value converted to newtons.
+ */
+double convertToNewtons (int a) {
+	//32767(0x7FFF) => "fullScale" g forces
+	double fullScale = 2;
+
+	//fullScale = 2*2^accelScale
+	//Since fullScale is 2/4/8/16
+	char i;
+	for (i = 0; i < accelScale; i++) {
+		fullScale *= 2;
+	}
+
+	return a * (fullScale/(double)0x7FFF) * 9.80665;
+}
+
+/*
+ * Sign extends the given 16-bit integer into a 32-bit integer.
+ *
+ * Returns the given 16-bit value sign extended to 32-bits.
+ */
+int signExtend16To32 (int a) {
+	return (a & 0x8000 ? a | 0xFFFF0000 : a & 0xFFFF);
 }
 
 /*
@@ -89,27 +136,25 @@ int sleepMPU9150 (void) {
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int getAccelValues (int* values) {
-	int data[3];
+int MPU9150_getAccelValues (double* values) {
 	int valueL;
 	int valueH;
 
 	//Accelerometer x
 	if (receiveMessage(MPU6150, ACCEL_XOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, ACCEL_XOUT_H, &valueH)) { return -1; }
-	data[0] = (valueH << 8) | valueL;
+	values[0] = convertToNewtons(signExtend16To32((valueH << 8) | valueL));
 
 	//Accelerometer y
 	if (receiveMessage(MPU6150, ACCEL_YOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, ACCEL_YOUT_H, &valueH)) { return -1; }
-	data[1] = (valueH << 8) | valueL;
+	values[1] = convertToNewtons(signExtend16To32((valueH << 8) | valueL));
 
 	//Accelerometer z
 	if (receiveMessage(MPU6150, ACCEL_ZOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, ACCEL_ZOUT_H, &valueH)) { return -1; }
-	data[2] = (valueH << 8) | valueL;
+	values[2] = convertToNewtons(signExtend16To32((valueH << 8) | valueL));
 
-	values = data;
 	return 0;
 }
 
@@ -120,26 +165,24 @@ int getAccelValues (int* values) {
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int getGyroValues (int* values) {
-	int data[3];
+int MPU9150_getGyroValues (double* values) {
 	int valueL;
 	int valueH;
 
 	//Gyroscope x
 	if (receiveMessage(MPU6150, GYRO_XOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, GYRO_XOUT_H, &valueH)) { return -1; }
-	data[0] = (valueH << 8) | valueL;
+	values[0] = convertToDegrees(signExtend16To32((valueH << 8) | valueL));
 
 	//Gyroscope y
 	if (receiveMessage(MPU6150, GYRO_YOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, GYRO_YOUT_H, &valueH)) { return -1; }
-	data[1] = (valueH << 8) | valueL;
+	values[1] = convertToDegrees(signExtend16To32((valueH << 8) | valueL));
 
 	//Gyroscope z
 	if (receiveMessage(MPU6150, GYRO_ZOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, GYRO_ZOUT_H, &valueH)) { return -1; }
-	data[2] = (valueH << 8) | valueL;
+	values[2] = convertToDegrees(signExtend16To32((valueH << 8) | valueL));
 
-	values = data;
 	return 0;
 }
