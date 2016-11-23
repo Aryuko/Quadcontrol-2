@@ -69,8 +69,52 @@
 #define OC4RSSET		PIC32_R (0x3628)
 #define OC4RSINV		PIC32_R (0x362c)
 
-const int period = 0x0C35;
+const int period = 0xC350;
+const int noThrottle = 2500;
+const int fullThrottle = 5000;
 
+/*
+ * Calculate a duty cycle value.
+ *
+ * parameter:
+ * proportion - the proportion of the period the new duty cycle should be.
+ *              (A value between 0 and 1.)
+ */
+int pwm_calcDutyCycle(double proportion) {
+	int delta = fullThrottle - noThrottle;
+
+	return (int) ((delta*proportion) + 0.5) + noThrottle;
+}
+
+/*
+ * Set a new duty cycle for the specified module.
+ *
+ * parameter:
+ * module - specifies the module.
+ * proportion - the proportion of the period the new duty cycle should be.
+ *              (A value between 0 and 1.)
+ *
+ */
+void pwm_setDutyCycle(int module, double proportion) {
+	switch (module) {
+		case 1: {
+			OC1RS = pwm_calcDutyCycle(proportion);
+			break;
+		}
+		case 2: {
+			OC2RS = pwm_calcDutyCycle(proportion);
+			break;
+		}
+		case 3: {
+			OC3RS = pwm_calcDutyCycle(proportion);
+			break;
+		}
+		case 4: {
+			OC4RS = pwm_calcDutyCycle(proportion);
+			break;
+		}
+	}
+}
 
 /*
  * Initialize Timer2 for use as period timer for pwm.
@@ -83,6 +127,8 @@ void pwm_initTimer() {
 	IFSCLR(0) = 0x00000100; // Clear the T2 interrupt flag
 	IECSET(0) = 0x00000100; // Enable T2 interrupt
 	IPCSET(2) = 0x0000001C; // Set T2 interrupt priority to 7
+
+	T2CONSET = 0x50; // Set prescale to 1:32
 	T2CONSET = 0x8000; // Enable Timer2
 }
 
@@ -99,8 +145,8 @@ void pwm_initModule(int module) {
 			OC1CON = 0x0006; // Configure for PWM mode without Fault pin enabled
 
 			//init the duty cycle to 100% of the period
-			OC1R = period; // Initialize primary Compare register
-			OC1RS = period; // Initialize secondary Compare register
+			OC1R = pwm_calcDutyCycle(1.0); // Initialize primary Compare register
+			OC1RS = pwm_calcDutyCycle(1.0); // Initialize secondary Compare register
 			OC1CONSET = 0x8000; // Enable OC1
 			break;
 		}
@@ -109,8 +155,8 @@ void pwm_initModule(int module) {
 			OC2CON = 0x0006; // Configure for PWM mode without Fault pin enabled
 
 			//init the duty cycle to 100% of the period
-			OC2R = period; // Initialize primary Compare register
-			OC2RS = period; // Initialize secondary Compare register
+			OC2R = pwm_calcDutyCycle(1.0); // Initialize primary Compare register
+			OC2RS = pwm_calcDutyCycle(1.0); // Initialize secondary Compare register
 			OC2CONSET = 0x8000; // Enable OC2
 			break;
 		}
@@ -119,8 +165,8 @@ void pwm_initModule(int module) {
 			OC3CON = 0x0006; // Configure for PWM mode without Fault pin enabled
 
 			//init the duty cycle to 100% of the period
-			OC3R = period; // Initialize primary Compare register
-			OC3RS = period; // Initialize secondary Compare register
+			OC3R = pwm_calcDutyCycle(1.0); // Initialize primary Compare register
+			OC3RS = pwm_calcDutyCycle(1.0); // Initialize secondary Compare register
 			OC3CONSET = 0x8000; // Enable OC3
 			break;
 		}
@@ -129,8 +175,8 @@ void pwm_initModule(int module) {
 			OC4CON = 0x0006; // Configure for PWM mode without Fault pin enabled
 
 			//init the duty cycle to 100% of the period
-			OC4R = period; // Initialize primary Compare register
-			OC4RS = period; // Initialize secondary Compare register
+			OC4R = pwm_calcDutyCycle(1.0); // Initialize primary Compare register
+			OC4RS = pwm_calcDutyCycle(1.0); // Initialize secondary Compare register
 			OC4CONSET = 0x8000; // Enable OC4
 			break;
 		}
@@ -164,36 +210,4 @@ void pwm_stopModule(int module) {
 		}
 	}
 	OC1CON = 0x0000; // Turn off the OC1 when performing the setup
-}
-
-
-/*
- * Set a new duty cycle.
- *
- * parameter:
- * proportion - the proportion of the period the new duty cycle should be.
- *              (A value between 0 and 1.)
- *
- */
-void pwm_setDutyCycle(int module, double proportion) {
-	int newDutyCycle = (int) ((period*proportion) + 0.5);
-
-	switch (module) {
-		case 1: {
-			OC1RS = newDutyCycle;
-			break;
-		}
-		case 2: {
-			OC2RS = newDutyCycle;
-			break;
-		}
-		case 3: {
-			OC3RS = newDutyCycle;
-			break;
-		}
-		case 4: {
-			OC4RS = newDutyCycle;
-			break;
-		}
-	}
 }
