@@ -8,6 +8,8 @@
 
 #pragma once
 
+int MPU9150_notConnected (void);
+
 int MPU9150_setup(void);
 
 int MPU9150_awaken(void);

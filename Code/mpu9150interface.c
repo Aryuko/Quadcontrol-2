@@ -24,6 +24,16 @@ char gyroScale = 3;
 //Accelerometer range scale, 0-3
 char accelScale = 3;
 
+/*
+ * Checks if the MPU9150 is properly connected and is able to communicate
+ *
+ * Returns 0 if it works as expected, -1 if not
+ */
+int MPU9150_notConnected (void) {
+	int data;
+	if (receiveMessage(MPU6150, WHO_AM_I, &data)) { return -1; }
+	return -(data == 0x68);
+}
 
 /*
  * Applies the desired settings by writing to config registers on the MPU9150
@@ -36,22 +46,22 @@ int MPU9150_setup (void) {
 	//Setup Digital Low Pass Filter, EXT_SYNC_SET is ignored
 	if (receiveMessage(MPU6150, CONFIG, &data)) { return -1; }
 	char sendData = (data & 0xF8) | DLPF;
-	if(sendMessage(MPU6150, CONFIG, sendData)) { return -1; }
+	if (sendMessage(MPU6150, CONFIG, sendData)) { return -1; }
 
 	//Setup clock source
 	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) { return -1; }
 	sendData = (data & 0xF8) | clockSource;
-	if(sendMessage(MPU6150, POWER_MGMT_1, sendData)) { return -1; }
+	if (sendMessage(MPU6150, POWER_MGMT_1, sendData)) { return -1; }
 
 
 	//Setup gyroscope config
 	sendData = gyroScale << 3;
-	if(sendMessage(MPU6150, GYRO_CONFIG, sendData)) { return -1; }
+	if (sendMessage(MPU6150, GYRO_CONFIG, sendData)) { return -1; }
 
 	//Setup accellerometer config
 	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) { return -1; }
 	sendData = (data & 0x18) | (accelScale << 3);
-	if(sendMessage(MPU6150, ACCEL_CONFIG, sendData)) { return -1; }
+	if (sendMessage(MPU6150, ACCEL_CONFIG, sendData)) { return -1; }
 }
 
 /*

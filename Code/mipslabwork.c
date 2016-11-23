@@ -95,8 +95,10 @@ void labinit( void )
 	// Start Timer 2
 	T2CON |= 0x8000;
 
-	MPU9150_setup();
-	MPU9150_awaken();
+	if(!MPU9150_notConnected) {
+		MPU9150_setup();
+		MPU9150_awaken();
+	}
 
 	return;
 }
