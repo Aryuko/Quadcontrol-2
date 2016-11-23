@@ -15,6 +15,9 @@
 //Digital Low Pass Filter, 0-7
 char DLPF = 0;
 
+//Clock source, 0-7
+char clockSource = 1;
+
 //Gyroscope range scale, 0-3
 char gyroScale = 0;
 
@@ -33,14 +36,26 @@ int setupMPU9150 (void) {
 		return -1;
 	}
 
+	//Setup clock source
+	int data;
+	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)){
+		return -1;
+	}
+
+	char clockConfig = (data & 0xF8) | clockSource;
+	if(sendMessage(MPU6150, POWER_MGMT_1, clockConfig)){
+		return -1;
+	}
+
+
 	//Setup gyroscope config
-	int gyroConfig = gyroScale << 3;
+	char gyroConfig = gyroScale << 3;
 	if(sendMessage(MPU6150, GYRO_CONFIG, gyroConfig)){
 		return -1;
 	}
 
 	//Setup accellerometer config
-	int accelConfig = accelScale << 3;
+	char accelConfig = accelScale << 3;
 	if(sendMessage(MPU6150, ACCEL_CONFIG, accelConfig)){
 		return -1;
 	}
