@@ -95,8 +95,8 @@ void labinit( void )
 	// Start Timer 2
 	T2CON |= 0x8000;
 
-	setupMPU9150();
-	awakenMPU9150();
+	MPU9150_setup();
+	MPU9150_awaken();
 
 	return;
 }
@@ -109,14 +109,15 @@ void labwork( void )
 	int accx = ~0 << 16;
 	accx = accx | ((accxh << 8) | accxl);
 */
-	int gyroValues[3];
-	if(getGyroValues(gyroValues)) {
+	double values[3];
+	if(MPU9150_getAccelValues(values)) {
 		display_string(0, "it didn't work");
 	} else {
-		display_string(0, itoaconv(gyroValues[0]));
-		display_string(1, itoaconv(gyroValues[1]));
-		display_string(2, itoaconv(gyroValues[2]));
+		display_string(0, itoaconv((int)(values[0]+0.5)));
+		display_string(1, itoaconv((int)(values[1]+0.5)));
+		display_string(2, itoaconv((int)(values[2]+0.5)));
 	}
 
 	display_update();
+	//quicksleep(8000000);
 }

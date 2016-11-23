@@ -30,7 +30,7 @@ char accelScale = 3;
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int setupMPU9150 (void) {
+int MPU9150_setup (void) {
 	//Setup Digital Low Pass Filter, EXT_SYNC_SET is ignored
 	if(sendMessage(MPU6150, CONFIG, DLPF)){
 		return -1;
@@ -66,7 +66,7 @@ int setupMPU9150 (void) {
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int awakenMPU9150 (void) {
+int MPU9150_awaken (void) {
 	int data;
 	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)){
 		return -1;
@@ -84,7 +84,7 @@ int awakenMPU9150 (void) {
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int sleepMPU9150 (void) {
+int MPU9150_sleep (void) {
 	int data;
 	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)){
 		return -1;
@@ -116,24 +116,33 @@ double convertToDegrees (int a) {
 	return a * (fullScale/(double)0x7FFF);
  }
 
- /*
-  * Converts the given relative value to newtons.
-  *
-  * Returns the given value converted to newtons.
-  */
- double convertToNewtons (int a) {
- 	//32767(0x7FFF) => "fullScale" g forces
-  	double fullScale = 2;
+/*
+ * Converts the given relative value to newtons.
+ *
+ * Returns the given value converted to newtons.
+ */
+double convertToNewtons (int a) {
+	//32767(0x7FFF) => "fullScale" g forces
+	double fullScale = 2;
 
- 	//fullScale = 2*2^accelScale
- 	//Since fullScale is 2/4/8/16
- 	char i;
- 	for (i = 0; i < accelScale; i++) {
- 		fullScale *= 2;
- 	}
+	//fullScale = 2*2^accelScale
+	//Since fullScale is 2/4/8/16
+	char i;
+	for (i = 0; i < accelScale; i++) {
+		fullScale *= 2;
+	}
 
- 	return a * (fullScale/(double)0x7FFF) * 9.80665;
-  }
+	return a * (fullScale/(double)0x7FFF) * 9.80665;
+}
+
+/*
+ * Sign extends the given 16-bit integer into a 32-bit integer.
+ *
+ * Returns the given 16-bit value sign extended to 32-bits.
+ */
+int signExtend16To32 (int a) {
+	return (a & 0x8000 ? a | 0xFFFF0000 : a & 0xFFFF);
+}
 
 /*
  * Fetches and returns the accelerometer values from the MPU9150.
@@ -142,7 +151,7 @@ double convertToDegrees (int a) {
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int getAccelValues (double* values) {
+int MPU9150_getAccelValues (double* values) {
 	int valueL;
 	int valueH;
 
@@ -171,7 +180,7 @@ int getAccelValues (double* values) {
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int getGyroValues (double* values) {
+int MPU9150_getGyroValues (double* values) {
 	int valueL;
 	int valueH;
 
@@ -191,13 +200,4 @@ int getGyroValues (double* values) {
 	values[2] = convertToDegrees(signExtend16To32((valueH << 8) | valueL));
 
 	return 0;
-}
-
-/*
- * Sign extends the given 16-bit integer into a 32-bit integer.
- *
- * Returns the given 16-bit value sign extended to 32-bits.
- */
-int signExtend16To32 (int a) {
-	return (a & 0x8000 ? a | 0xFFFF0000 : a & 0xFFFF);
 }

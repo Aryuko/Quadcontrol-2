@@ -8,12 +8,12 @@
 
 #pragma once
 
-int setupMPU9150(void);
+int MPU9150_setup(void);
 
-int awakenMPU9150(void);
+int MPU9150_awaken(void);
 
-int sleepMPU9150(void);
+int MPU9150_sleep(void);
 
-int getAccelValues(double* values);
+int MPU9150_getAccelValues(double* values);
 
-int getGyroValues(double* values);
+int MPU9150_getGyroValues(double* values);
