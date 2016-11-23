@@ -31,34 +31,27 @@ char accelScale = 3;
  * Returns 0 if successfull, -1 otherwise
  */
 int MPU9150_setup (void) {
+	int data;
+
 	//Setup Digital Low Pass Filter, EXT_SYNC_SET is ignored
-	if(sendMessage(MPU6150, CONFIG, DLPF)){
-		return -1;
-	}
+	if (receiveMessage(MPU6150, CONFIG, &data)) { return -1; }
+	char sendData = (data & 0xF8) | DLPF;
+	if(sendMessage(MPU6150, CONFIG, sendData)) { return -1; }
 
 	//Setup clock source
-	int data;
-	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)){
-		return -1;
-	}
-
-	char clockConfig = (data & 0xF8) | clockSource;
-	if(sendMessage(MPU6150, POWER_MGMT_1, clockConfig)){
-		return -1;
-	}
+	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) { return -1; }
+	sendData = (data & 0xF8) | clockSource;
+	if(sendMessage(MPU6150, POWER_MGMT_1, sendData)) { return -1; }
 
 
 	//Setup gyroscope config
-	char gyroConfig = gyroScale << 3;
-	if(sendMessage(MPU6150, GYRO_CONFIG, gyroConfig)){
-		return -1;
-	}
+	sendData = gyroScale << 3;
+	if(sendMessage(MPU6150, GYRO_CONFIG, sendData)) { return -1; }
 
 	//Setup accellerometer config
-	char accelConfig = accelScale << 3;
-	if(sendMessage(MPU6150, ACCEL_CONFIG, accelConfig)){
-		return -1;
-	}
+	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) { return -1; }
+	sendData = (data & 0x18) | (accelScale << 3);
+	if(sendMessage(MPU6150, ACCEL_CONFIG, sendData)) { return -1; }
 }
 
 /*
@@ -68,14 +61,10 @@ int MPU9150_setup (void) {
  */
 int MPU9150_awaken (void) {
 	int data;
-	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)){
-		return -1;
-	}
+	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) {	return -1; }
 
 	data = data & ~(1 << 6);
-	if (sendMessage(MPU6150, POWER_MGMT_1, data)){
-		return -1;
-	}
+	if (sendMessage(MPU6150, POWER_MGMT_1, data)) {	return -1; }
 	return 0;
 }
 
@@ -86,14 +75,10 @@ int MPU9150_awaken (void) {
  */
 int MPU9150_sleep (void) {
 	int data;
-	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)){
-		return -1;
-	}
+	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) {	return -1; }
 
 	data = data | (1 << 6);
-	if (sendMessage(MPU6150, POWER_MGMT_1, data)){
-		return -1;
-	}
+	if (sendMessage(MPU6150, POWER_MGMT_1, data)) {	return -1; }
 	return 0;
 }
 
