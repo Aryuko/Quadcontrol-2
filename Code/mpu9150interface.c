@@ -136,25 +136,32 @@ int getAccelValues (int* values) {
  * Returns 0 if successfull, -1 otherwise
  */
 int getGyroValues (int* values) {
-	int data[3];
 	int valueL;
 	int valueH;
 
 	//Gyroscope x
 	if (receiveMessage(MPU6150, GYRO_XOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, GYRO_XOUT_H, &valueH)) { return -1; }
-	data[0] = (valueH << 8) | valueL;
+	values[0] = signExtend16To32((valueH << 8) | valueL);
 
 	//Gyroscope y
 	if (receiveMessage(MPU6150, GYRO_YOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, GYRO_YOUT_H, &valueH)) { return -1; }
-	data[1] = (valueH << 8) | valueL;
+	values[1] = signExtend16To32((valueH << 8) | valueL);
 
 	//Gyroscope z
 	if (receiveMessage(MPU6150, GYRO_ZOUT_L, &valueL)) { return -1; }
 	if (receiveMessage(MPU6150, GYRO_ZOUT_H, &valueH)) { return -1; }
-	data[2] = (valueH << 8) | valueL;
+	values[2] = signExtend16To32((valueH << 8) | valueL);
 
-	values = data;
 	return 0;
+}
+
+/*
+ * Sign extends the given 16-bit integer into a 32-bit integer.
+ *
+ * Returns the given 16-bit value sign extended to 32-bits.
+ */
+int signExtend16To32 (int a) {
+	return (a & 0x8000 ? a | 0xFFFF0000 : a & 0xFFFF);
 }
