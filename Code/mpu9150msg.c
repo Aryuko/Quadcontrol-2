@@ -1,3 +1,11 @@
+/*
+ * A interface for sending messages to a MPU9150.
+ *
+ * For http://github.com/Zalodu/Quadcontrol-2
+ * Authors: Jesper Larsson (MrLarssonJr), Peter Kjellén (Zalodu)
+ * Date: 23/11/16
+ */
+
 #include <pic32mx.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -144,7 +152,7 @@ int receiveMessage(char slaveAddress, char slaveRegister, int* receivedByte) {
   if (repeatedReceiveMessage(slaveAddress, slaveRegister, receivedBytes, 1)){
 	  return -1;
   }
-  
+
   *receivedByte = receivedBytes[0];
   return 0;
 }
