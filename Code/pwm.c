@@ -69,7 +69,8 @@
 #define OC4RSSET		PIC32_R (0x3628)
 #define OC4RSINV		PIC32_R (0x362c)
 
-const int period = 0xC350;
+//0xC350 = 20ms
+const int period = 0xC350 >> 3;
 const int noThrottle = 2500;
 const int fullThrottle = 5000;
 
@@ -145,8 +146,8 @@ void pwm_initModule(int module) {
 			OC1CON = 0x0006; // Configure for PWM mode without Fault pin enabled
 
 			//init the duty cycle to 100% of the period
-			OC1R = pwm_calcDutyCycle(1.0); // Initialize primary Compare register
-			OC1RS = pwm_calcDutyCycle(1.0); // Initialize secondary Compare register
+			OC1R = pwm_calcDutyCycle(1); // Initialize primary Compare register
+			OC1RS = pwm_calcDutyCycle(1); // Initialize secondary Compare register
 			OC1CONSET = 0x8000; // Enable OC1
 			break;
 		}

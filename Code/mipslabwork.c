@@ -106,7 +106,7 @@ void labwork( void )
 	int accx = ~0 << 16;
 	accx = accx | ((accxh << 8) | accxl);
 */
-	double values[3];
+	/*double values[3];
 	if(MPU9150_getAccelValues(values)) {
 		display_string(0, "it didn't work");
 	} else {
@@ -116,5 +116,5 @@ void labwork( void )
 	}
 
 	display_update();
-	//quicksleep(8000000);
+	//quicksleep(8000000);*/
 }
