@@ -69,49 +69,32 @@
 #define OC4RSSET		PIC32_R (0x3628)
 #define OC4RSINV		PIC32_R (0x362c)
 
-//0xC350 = 20ms
-const int period = 0xC350 >> 3;
-const int noThrottle = 2500;
-const int fullThrottle = 5000;
-
-/*
- * Calculate a duty cycle value.
- *
- * parameter:
- * proportion - the proportion of the period the new duty cycle should be.
- *              (A value between 0 and 1.)
- */
-int pwm_calcDutyCycle(double proportion) {
-	int delta = fullThrottle - noThrottle;
-
-	return (int) ((delta*proportion) + 0.5) + noThrottle;
-}
+#include "pwm.h"
 
 /*
  * Set a new duty cycle for the specified module.
  *
- * parameter:
+ * Parameter(s):
  * module - specifies the module.
- * proportion - the proportion of the period the new duty cycle should be.
- *              (A value between 0 and 1.)
+ * dutyCycle - at what timer value the pinb should be driven low.
  *
  */
-void pwm_setDutyCycle(int module, double proportion) {
+void pwm_setDutyCycle(int module, int dutyCycle) {
 	switch (module) {
 		case 1: {
-			OC1RS = pwm_calcDutyCycle(proportion);
+			OC1RS = dutyCycle;
 			break;
 		}
 		case 2: {
-			OC2RS = pwm_calcDutyCycle(proportion);
+			OC2RS = dutyCycle;
 			break;
 		}
 		case 3: {
-			OC3RS = pwm_calcDutyCycle(proportion);
+			OC3RS = dutyCycle;
 			break;
 		}
 		case 4: {
-			OC4RS = pwm_calcDutyCycle(proportion);
+			OC4RS = dutyCycle;
 			break;
 		}
 	}
@@ -119,8 +102,11 @@ void pwm_setDutyCycle(int module, double proportion) {
 
 /*
  * Initialize Timer2 for use as period timer for pwm.
+ *
+ * Parameter(s):
+ * period - timer period.
  */
-void pwm_initTimer() {
+void pwm_initTimer(int period) {
 	PR2 = period; // Set period
 	// Configure Timer2 interrupt. Note that in PWM mode, the
 	// corresponding source timer interrupt flag is asserted.
@@ -136,18 +122,19 @@ void pwm_initTimer() {
 /*
  * Initialize the specified output compare module.
  *
- * Parameter:
+ * Parameter(s):
  * module - specifies module (1 <= module <= 4)
+ * initialDutyCycle - the initialDutyCycle (see pwm_setDutyCycle)
  */
-void pwm_initModule(int module) {
+void pwm_initModule(int module, int initialDutyCycle) {
 	switch (module) {
 		case 1: {
 			OC1CON = 0x0000; // Turn off the OC1 when performing the setup
 			OC1CON = 0x0006; // Configure for PWM mode without Fault pin enabled
 
 			//init the duty cycle to 100% of the period
-			OC1R = pwm_calcDutyCycle(1); // Initialize primary Compare register
-			OC1RS = pwm_calcDutyCycle(1); // Initialize secondary Compare register
+			OC1R = initialDutyCycle; // Initialize primary Compare register
+			OC1RS = initialDutyCycle; // Initialize secondary Compare register
 			OC1CONSET = 0x8000; // Enable OC1
 			break;
 		}
@@ -156,8 +143,8 @@ void pwm_initModule(int module) {
 			OC2CON = 0x0006; // Configure for PWM mode without Fault pin enabled
 
 			//init the duty cycle to 100% of the period
-			OC2R = pwm_calcDutyCycle(1.0); // Initialize primary Compare register
-			OC2RS = pwm_calcDutyCycle(1.0); // Initialize secondary Compare register
+			OC2R = initialDutyCycle; // Initialize primary Compare register
+			OC2RS = initialDutyCycle; // Initialize secondary Compare register
 			OC2CONSET = 0x8000; // Enable OC2
 			break;
 		}
@@ -166,8 +153,8 @@ void pwm_initModule(int module) {
 			OC3CON = 0x0006; // Configure for PWM mode without Fault pin enabled
 
 			//init the duty cycle to 100% of the period
-			OC3R = pwm_calcDutyCycle(1.0); // Initialize primary Compare register
-			OC3RS = pwm_calcDutyCycle(1.0); // Initialize secondary Compare register
+			OC3R = initialDutyCycle; // Initialize primary Compare register
+			OC3RS = initialDutyCycle; // Initialize secondary Compare register
 			OC3CONSET = 0x8000; // Enable OC3
 			break;
 		}
@@ -176,8 +163,8 @@ void pwm_initModule(int module) {
 			OC4CON = 0x0006; // Configure for PWM mode without Fault pin enabled
 
 			//init the duty cycle to 100% of the period
-			OC4R = pwm_calcDutyCycle(1.0); // Initialize primary Compare register
-			OC4RS = pwm_calcDutyCycle(1.0); // Initialize secondary Compare register
+			OC4R = initialDutyCycle; // Initialize primary Compare register
+			OC4RS = initialDutyCycle; // Initialize secondary Compare register
 			OC4CONSET = 0x8000; // Enable OC4
 			break;
 		}
@@ -188,7 +175,7 @@ void pwm_initModule(int module) {
 /*
  * Stop the specified output compare module.
  *
- * Parameter:
+ * Parameter(s):
  * module - specifies module (1 <= module <= 4)
  */
 void pwm_stopModule(int module) {
