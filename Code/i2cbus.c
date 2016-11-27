@@ -51,7 +51,7 @@ int state = PREINIT;
 /*
  * Lookups what value BRG should have for 400khz mode.
  */
-int lookupBRG100(void) {
+int i2cbus_lookupBRG100(void) {
 	int PBCLK = (DEVCFG1 >> PBCLK_START_INDEX) & PBCLK_REGISTER_MASK;
 
 	int valueBRG;
@@ -77,7 +77,7 @@ int lookupBRG100(void) {
 /*
  * Lookups what value BRG should have for 100khz mode.
  */
-int lookupBRG400(void) {
+int i2cbus_lookupBRG400(void) {
 	int PBCLK = (DEVCFG1 >> PBCLK_START_INDEX) & PBCLK_REGISTER_MASK;
 
 	int valueBRG;
@@ -100,11 +100,11 @@ int lookupBRG400(void) {
 	return valueBRG;
 }
 
-void clearMasterInterruptFlag(void) {
+void i2cbus_clearMasterInterruptFlag(void) {
 	IFSCLR(0) = 0x80000000;
 }
 
-void waitForMasterInterrupt(void) {
+void i2cbus_waitForMasterInterrupt(void) {
 	while(MASTER_INTERRUPT_1_READ == 0) {}
 	clearMasterInterruptFlag();
 }
@@ -113,7 +113,7 @@ void waitForMasterInterrupt(void) {
  * Interface methods
  */
 
-int init(void) {
+int i2cbus_init(void) {
 	//Check that we are in PREINIT state
 	if(state != PREINIT) {
 		return -1;
@@ -130,7 +130,7 @@ int init(void) {
 	return 0;
 }
 
-int start(void) {
+int i2cbus_start(void) {
 	//Check that we are in IDLE state
 	if(state != IDLE) {
 		return -1;
@@ -148,7 +148,7 @@ int start(void) {
 	return 0;
 }
 
-int restart(void) {
+int i2cbus_restart(void) {
 	//Check that we are in the WAIT state
 	if(state  != WAIT) {
 		return -1;
@@ -166,7 +166,7 @@ int restart(void) {
 	return 0;
 }
 
-int stop(void) {
+int i2cbus_stop(void) {
 	//Check that we are in WAIT state
 	if(state != WAIT) {
 		return -1;
@@ -184,7 +184,7 @@ int stop(void) {
 	return 0;
 }
 
-int send(char byte) {
+int i2cbus_send(char byte) {
 	//Check that we are in WAIT state
 	if(state != WAIT) {
 		return -1;
@@ -213,7 +213,7 @@ int send(char byte) {
  *
  * Returns -1 if not in WAIT state, the byte received otherwise.
  */
-int receive(void) {
+int i2cbus_receive(void) {
 	//Check that we are in WAIT state
 	if(state != WAIT) {
 		return -1;
@@ -239,7 +239,7 @@ int receive(void) {
  * typeACK = 0 => ACK
  * typeACK = 1 => NACK
  */
-int generateACK(int typeACK) {
+int i2cbus_generateACK(int typeACK) {
 	//Check that we are in WAIT state
 	if(state != WAIT) {
 		return -1;
