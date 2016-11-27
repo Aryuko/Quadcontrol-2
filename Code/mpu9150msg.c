@@ -24,7 +24,7 @@ char initialised = FALSE;
 /*
  * Initialise the I2C bus, if it isn't already.
  */
-void initIfNotAllready(void) {
+void mpu9150msg_initIfNotAllready(void) {
   if(!initialised) {
     init();
     initialised = TRUE;
@@ -36,7 +36,7 @@ void initIfNotAllready(void) {
  *
  * Returns 0 if successfull, -1 if not.
  */
-int repeatedSendMessage(char slaveAddress, char firstSlaveRegister, char dataBytes[], int length) {
+int mpu9150msg_repeatedSendMessage(char slaveAddress, char firstSlaveRegister, char dataBytes[], int length) {
   initIfNotAllready();
 
   start();
@@ -76,7 +76,7 @@ int repeatedSendMessage(char slaveAddress, char firstSlaveRegister, char dataByt
  *
  * Returns 0 if successfull, -1 if not.
  */
-int sendMessage(char slaveAddress, char slaveRegister, char dataByte) {
+int mpu9150msg_sendMessage(char slaveAddress, char slaveRegister, char dataByte) {
 	char dataBytes[] = {dataByte};
 
 	return repeatedSendMessage(slaveAddress, slaveRegister, dataBytes, 1);
@@ -87,7 +87,7 @@ int sendMessage(char slaveAddress, char slaveRegister, char dataByte) {
  *
  * Returns 0 if successfull, -1 otherwise.
  */
-int repeatedReceiveMessage(char slaveAddress, char slaveRegister, int* receivedBytes, int times) {
+int mpu9150msg_repeatedReceiveMessage(char slaveAddress, char slaveRegister, int* receivedBytes, int times) {
   initIfNotAllready();
 
   int i;
@@ -146,7 +146,7 @@ int repeatedReceiveMessage(char slaveAddress, char slaveRegister, int* receivedB
  *
  * Returns 0 if successfull, -1 otherwise.
  */
-int receiveMessage(char slaveAddress, char slaveRegister, int* receivedByte) {
+int mpu9150msg_receiveMessage(char slaveAddress, char slaveRegister, int* receivedByte) {
   int receivedBytes[1];
 
   if (repeatedReceiveMessage(slaveAddress, slaveRegister, receivedBytes, 1)){
