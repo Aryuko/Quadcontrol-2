@@ -91,10 +91,6 @@ void labinit( void )
 
 	enable_interrupts();
 
-	pwm_initTimer();
-	pwm_initModule(1);
-
-
 	return;
 }
 
@@ -106,8 +102,10 @@ void labwork( void )
 	int accx = ~0 << 16;
 	accx = accx | ((accxh << 8) | accxl);
 */
-	/*double values[3];
-	if(MPU9150_getAccelValues(values)) {
+
+	/*
+	double values[3];
+	if(mpu9150interface_getAccelValues(values)) {
 		display_string(0, "it didn't work");
 	} else {
 		display_string(0, itoaconv((int)(values[0]+0.5)));
