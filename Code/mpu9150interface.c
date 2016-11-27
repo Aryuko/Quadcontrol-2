@@ -30,7 +30,7 @@ char accelScale = 3;
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int MPU9150_setup (void) {
+int mpu9150interface_setup (void) {
 	int data;
 
 	//Setup Digital Low Pass Filter, EXT_SYNC_SET is ignored
@@ -59,7 +59,7 @@ int MPU9150_setup (void) {
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int MPU9150_awaken (void) {
+int mpu9150interface_awaken (void) {
 	int data;
 	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) {	return -1; }
 
@@ -73,7 +73,7 @@ int MPU9150_awaken (void) {
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int MPU9150_sleep (void) {
+int mpu9150interface_sleep (void) {
 	int data;
 	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) {	return -1; }
 
@@ -87,7 +87,7 @@ int MPU9150_sleep (void) {
  *
  * Returns the given value converted to degrees.
  */
-double convertToDegrees (int a) {
+double mpu9150interface_convertToDegrees (int a) {
 	//32767(0x7FFF) => "fullScale" degrees
  	double fullScale = 250;
 
@@ -106,7 +106,7 @@ double convertToDegrees (int a) {
  *
  * Returns the given value converted to newtons.
  */
-double convertToNewtons (int a) {
+double mpu9150interface_convertToNewtons (int a) {
 	//32767(0x7FFF) => "fullScale" g forces
 	double fullScale = 2;
 
@@ -125,7 +125,7 @@ double convertToNewtons (int a) {
  *
  * Returns the given 16-bit value sign extended to 32-bits.
  */
-int signExtend16To32 (int a) {
+int mpu9150interface_signExtend16To32 (int a) {
 	return (a & 0x8000 ? a | 0xFFFF0000 : a & 0xFFFF);
 }
 
@@ -136,7 +136,7 @@ int signExtend16To32 (int a) {
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int MPU9150_getAccelValues (double* values) {
+int mpu9150interface_MPU9150_getAccelValues (double* values) {
 	int valueL;
 	int valueH;
 
@@ -165,7 +165,7 @@ int MPU9150_getAccelValues (double* values) {
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int MPU9150_getGyroValues (double* values) {
+int mpu9150interface_getGyroValues (double* values) {
 	int valueL;
 	int valueH;
 
