@@ -106,7 +106,7 @@ void i2cbus_clearMasterInterruptFlag(void) {
 
 void i2cbus_waitForMasterInterrupt(void) {
 	while(MASTER_INTERRUPT_1_READ == 0) {}
-	clearMasterInterruptFlag();
+	i2cbus_clearMasterInterruptFlag();
 }
 
 /*=============================================================================
@@ -122,7 +122,7 @@ int i2cbus_init(void) {
 	//Start initialisation
 	state = INIT;
 
-	I2C1BRG = lookupBRG100();
+	I2C1BRG = i2cbus_lookupBRG100();
 	ON_1_SET;
 
 	//Transition from INIT to IDLE

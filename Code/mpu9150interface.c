@@ -34,24 +34,24 @@ int mpu9150interface_setup (void) {
 	int data;
 
 	//Setup Digital Low Pass Filter, EXT_SYNC_SET is ignored
-	if (receiveMessage(MPU6150, CONFIG, &data)) { return -1; }
+	if (mpu9150msg_receiveMessage(MPU6150, CONFIG, &data)) { return -1; }
 	char sendData = (data & 0xF8) | DLPF;
-	if(sendMessage(MPU6150, CONFIG, sendData)) { return -1; }
+	if(mpu9150msg_sendMessage(MPU6150, CONFIG, sendData)) { return -1; }
 
 	//Setup clock source
-	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) { return -1; }
+	if (mpu9150msg_receiveMessage(MPU6150, POWER_MGMT_1, &data)) { return -1; }
 	sendData = (data & 0xF8) | clockSource;
-	if(sendMessage(MPU6150, POWER_MGMT_1, sendData)) { return -1; }
+	if(mpu9150msg_sendMessage(MPU6150, POWER_MGMT_1, sendData)) { return -1; }
 
 
 	//Setup gyroscope config
 	sendData = gyroScale << 3;
-	if(sendMessage(MPU6150, GYRO_CONFIG, sendData)) { return -1; }
+	if(mpu9150msg_sendMessage(MPU6150, GYRO_CONFIG, sendData)) { return -1; }
 
 	//Setup accellerometer config
-	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) { return -1; }
+	if (mpu9150msg_receiveMessage(MPU6150, POWER_MGMT_1, &data)) { return -1; }
 	sendData = (data & 0x18) | (accelScale << 3);
-	if(sendMessage(MPU6150, ACCEL_CONFIG, sendData)) { return -1; }
+	if(mpu9150msg_sendMessage(MPU6150, ACCEL_CONFIG, sendData)) { return -1; }
 }
 
 /*
@@ -61,10 +61,10 @@ int mpu9150interface_setup (void) {
  */
 int mpu9150interface_awaken (void) {
 	int data;
-	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) {	return -1; }
+	if (mpu9150msg_receiveMessage(MPU6150, POWER_MGMT_1, &data)) {	return -1; }
 
 	data = data & ~(1 << 6);
-	if (sendMessage(MPU6150, POWER_MGMT_1, data)) {	return -1; }
+	if (mpu9150msg_sendMessage(MPU6150, POWER_MGMT_1, data)) {	return -1; }
 	return 0;
 }
 
@@ -75,10 +75,10 @@ int mpu9150interface_awaken (void) {
  */
 int mpu9150interface_sleep (void) {
 	int data;
-	if (receiveMessage(MPU6150, POWER_MGMT_1, &data)) {	return -1; }
+	if (mpu9150msg_receiveMessage(MPU6150, POWER_MGMT_1, &data)) {	return -1; }
 
 	data = data | (1 << 6);
-	if (sendMessage(MPU6150, POWER_MGMT_1, data)) {	return -1; }
+	if (mpu9150msg_sendMessage(MPU6150, POWER_MGMT_1, data)) {	return -1; }
 	return 0;
 }
 
@@ -136,24 +136,24 @@ int mpu9150interface_signExtend16To32 (int a) {
  *
  * Returns 0 if successfull, -1 otherwise
  */
-int mpu9150interface_MPU9150_getAccelValues (double* values) {
+int mpu9150interface_getAccelValues (double* values) {
 	int valueL;
 	int valueH;
 
 	//Accelerometer x
-	if (receiveMessage(MPU6150, ACCEL_XOUT_L, &valueL)) { return -1; }
-	if (receiveMessage(MPU6150, ACCEL_XOUT_H, &valueH)) { return -1; }
-	values[0] = convertToNewtons(signExtend16To32((valueH << 8) | valueL));
+	if (mpu9150msg_receiveMessage(MPU6150, ACCEL_XOUT_L, &valueL)) { return -1; }
+	if (mpu9150msg_receiveMessage(MPU6150, ACCEL_XOUT_H, &valueH)) { return -1; }
+	values[0] = mpu9150interface_convertToNewtons(mpu9150interface_signExtend16To32((valueH << 8) | valueL));
 
 	//Accelerometer y
-	if (receiveMessage(MPU6150, ACCEL_YOUT_L, &valueL)) { return -1; }
-	if (receiveMessage(MPU6150, ACCEL_YOUT_H, &valueH)) { return -1; }
-	values[1] = convertToNewtons(signExtend16To32((valueH << 8) | valueL));
+	if (mpu9150msg_receiveMessage(MPU6150, ACCEL_YOUT_L, &valueL)) { return -1; }
+	if (mpu9150msg_receiveMessage(MPU6150, ACCEL_YOUT_H, &valueH)) { return -1; }
+	values[1] = mpu9150interface_convertToNewtons(mpu9150interface_signExtend16To32((valueH << 8) | valueL));
 
 	//Accelerometer z
-	if (receiveMessage(MPU6150, ACCEL_ZOUT_L, &valueL)) { return -1; }
-	if (receiveMessage(MPU6150, ACCEL_ZOUT_H, &valueH)) { return -1; }
-	values[2] = convertToNewtons(signExtend16To32((valueH << 8) | valueL));
+	if (mpu9150msg_receiveMessage(MPU6150, ACCEL_ZOUT_L, &valueL)) { return -1; }
+	if (mpu9150msg_receiveMessage(MPU6150, ACCEL_ZOUT_H, &valueH)) { return -1; }
+	values[2] = mpu9150interface_convertToNewtons(mpu9150interface_signExtend16To32((valueH << 8) | valueL));
 
 	return 0;
 }
@@ -170,19 +170,19 @@ int mpu9150interface_getGyroValues (double* values) {
 	int valueH;
 
 	//Gyroscope x
-	if (receiveMessage(MPU6150, GYRO_XOUT_L, &valueL)) { return -1; }
-	if (receiveMessage(MPU6150, GYRO_XOUT_H, &valueH)) { return -1; }
-	values[0] = convertToDegrees(signExtend16To32((valueH << 8) | valueL));
+	if (mpu9150msg_receiveMessage(MPU6150, GYRO_XOUT_L, &valueL)) { return -1; }
+	if (mpu9150msg_receiveMessage(MPU6150, GYRO_XOUT_H, &valueH)) { return -1; }
+	values[0] = mpu9150interface_convertToDegrees(mpu9150interface_signExtend16To32((valueH << 8) | valueL));
 
 	//Gyroscope y
-	if (receiveMessage(MPU6150, GYRO_YOUT_L, &valueL)) { return -1; }
-	if (receiveMessage(MPU6150, GYRO_YOUT_H, &valueH)) { return -1; }
-	values[1] = convertToDegrees(signExtend16To32((valueH << 8) | valueL));
+	if (mpu9150msg_receiveMessage(MPU6150, GYRO_YOUT_L, &valueL)) { return -1; }
+	if (mpu9150msg_receiveMessage(MPU6150, GYRO_YOUT_H, &valueH)) { return -1; }
+	values[1] = mpu9150interface_convertToDegrees(mpu9150interface_signExtend16To32((valueH << 8) | valueL));
 
 	//Gyroscope z
-	if (receiveMessage(MPU6150, GYRO_ZOUT_L, &valueL)) { return -1; }
-	if (receiveMessage(MPU6150, GYRO_ZOUT_H, &valueH)) { return -1; }
-	values[2] = convertToDegrees(signExtend16To32((valueH << 8) | valueL));
+	if (mpu9150msg_receiveMessage(MPU6150, GYRO_ZOUT_L, &valueL)) { return -1; }
+	if (mpu9150msg_receiveMessage(MPU6150, GYRO_ZOUT_H, &valueH)) { return -1; }
+	values[2] = mpu9150interface_convertToDegrees(mpu9150interface_signExtend16To32((valueH << 8) | valueL));
 
 	return 0;
 }

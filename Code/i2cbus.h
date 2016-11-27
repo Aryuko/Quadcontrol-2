@@ -18,6 +18,6 @@ int i2cbus_stop(void);
 
 int i2cbus_send(char byte);
 
-int i2cbus_recive(void);
+int i2cbus_receive(void);
 
 int i2cbus_generateACK(int typeACK);

@@ -95,8 +95,8 @@ void labinit( void )
 	// Start Timer 2
 	T2CON |= 0x8000;
 
-	MPU9150_setup();
-	MPU9150_awaken();
+	mpu9150interface_setup();
+	mpu9150interface_awaken();
 
 	return;
 }
@@ -110,7 +110,7 @@ void labwork( void )
 	accx = accx | ((accxh << 8) | accxl);
 */
 	double values[3];
-	if(MPU9150_getAccelValues(values)) {
+	if(mpu9150interface_getAccelValues(values)) {
 		display_string(0, "it didn't work");
 	} else {
 		display_string(0, itoaconv((int)(values[0]+0.5)));
