@@ -1,0 +1,6 @@
+#pragma once
+
+#define MOTOR_FRONT_MODULE 1
+#define MOTOR_REAR_MODULE 2
+#define MOTOR_LEFT_MODULE 3
+#define MOTOR_RIGHT_MODULE 4
