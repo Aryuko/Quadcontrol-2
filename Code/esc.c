@@ -4,12 +4,14 @@
 #define PERIOD 6250 //2.5ms
 
 //Startup wait times
-#define NORMAL_START_SLEEP_TIME 48000000 //ish 3s
-#define SET_THROTTLE_RANGE_START_SLEEP_TIME 48000000 //ish 3s
+#define NORMAL_START_SLEEP_TIME 1800 //ish 4s
+#define SET_THROTTLE_RANGE_START_SLEEP_TIME1 1200 //ish 3s
+#define SET_THROTTLE_RANGE_START_SLEEP_TIME2 1200 //ish 3s
 
 #include "esc.h"
 #include "pwm.h"
 #include "hardwareConfig.h"
+#include "time.h"
 
 /*
  * Initialize all ESCs.
@@ -32,7 +34,7 @@ void esc_init(int startupProcedure) {
       pwm_initModule(MOTOR_LEFT_MODULE, MIN_THROTTLE);
       pwm_initModule(MOTOR_RIGHT_MODULE, MIN_THROTTLE);
 
-      quicksleep(NORMAL_START_SLEEP_TIME);
+	  time_blockFor(NORMAL_START_SLEEP_TIME);
       break;
     }
     case SET_THROTTLE_RANGE_START: {
@@ -41,12 +43,13 @@ void esc_init(int startupProcedure) {
       pwm_initModule(MOTOR_LEFT_MODULE, MAX_THROTTLE);
       pwm_initModule(MOTOR_RIGHT_MODULE, MAX_THROTTLE);
 
-      quicksleep(SET_THROTTLE_RANGE_START_SLEEP_TIME);
+      time_blockFor(SET_THROTTLE_RANGE_START_SLEEP_TIME1);
 
       esc_setSpeed(MOTOR_FRONT, 0);
       esc_setSpeed(MOTOR_REAR, 0);
       esc_setSpeed(MOTOR_LEFT, 0);
       esc_setSpeed(MOTOR_RIGHT, 0);
+	  time_blockFor(SET_THROTTLE_RANGE_START_SLEEP_TIME2);
       break;
     }
   }
@@ -62,6 +65,16 @@ int esc_calcDutyCycle(double proportion) {
   int delta = MAX_THROTTLE - MIN_THROTTLE;
 
   return (int) ((delta*proportion) + 0.5) + MIN_THROTTLE;
+}
+
+double esc_sanatizeInput(double proportion) {
+	if(proportion > 1) {
+		return 1;
+	} else if(proportion < 0) {
+		return 0;
+	} else {
+		return proportion;
+	}
 }
 
 /*
@@ -98,5 +111,5 @@ int esc_motorToModule(int motor) {
  * proportionOfThrottle - proportion of throttle.
  */
 void esc_setSpeed(int motor, double proportionOfThrottle) {
-  pwm_setDutyCycle(esc_motorToModule(motor), esc_calcDutyCycle(proportionOfThrottle));
+  pwm_setDutyCycle(esc_motorToModule(motor), esc_calcDutyCycle(esc_sanatizeInput(proportionOfThrottle)));
 }
