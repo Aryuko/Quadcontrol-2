@@ -31,7 +31,7 @@ char accelScale = 3;
  */
 int mpu9150interface_notConnected (void) {
 	int data;
-	if (receiveMessage(MPU6150, WHO_AM_I, &data)) { return -1; }
+	if (mpu9150msg_receiveMessage(MPU6150, WHO_AM_I, &data)) { return -1; }
 	return -(data == 0x68);
 }
 
@@ -45,6 +45,7 @@ int mpu9150interface_setup (void) {
 
 	//Setup Digital Low Pass Filter, EXT_SYNC_SET is ignored
 	if (mpu9150msg_receiveMessage(MPU6150, CONFIG, &data)) { return -1; }
+	char sendData = (data & 0xF8) | DLPF;
 	if(mpu9150msg_sendMessage(MPU6150, CONFIG, sendData)) { return -1; }
 
 	//Setup clock source
