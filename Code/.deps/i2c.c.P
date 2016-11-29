@@ -1,6 +1,0 @@
-i2c.c.o: i2c.c \
- /Applications/mcb32tools.app/Contents/Resources/Toolchain/include/pic32mx.h \
- i2c.h
-i2c.c :
- /Applications/mcb32tools.app/Contents/Resources/Toolchain/include/pic32mx.h :
- i2c.h :

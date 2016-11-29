@@ -1,12 +1,18 @@
-/*
- * A simple interface for the I2C bus.
- */
+ /*
+  * A simple interface for the I2C bus.
+  *
+  * For http://github.com/Zalodu/Quadcontrol-2
+  * Author: Jesper Larsson (MrLarssonJr)
+  * Date: 11/11/16
+  */
 
 #include <pic32mx.h>
+#include <stdint.h>
 #include "i2cmap.h"
+#include "mipslab.h"
 
-#define UNKNOWN -2
-#define PREINIT -1
+#define UNKNOWN 10
+#define PREINIT 9
 #define INIT 0
 #define IDLE 1
 #define START 2
@@ -30,6 +36,8 @@
 #define PBCLK_START_INDEX 12
 #define PBCLK_REGISTER_MASK 3
 
+const int waitDuration = 150;
+
 /*=============================================================================
  * State
  */
@@ -43,7 +51,33 @@ int state = PREINIT;
 /*
  * Lookups what value BRG should have for 400khz mode.
  */
-int lookupBRG(void) {
+int i2cbus_lookupBRG100(void) {
+	int PBCLK = (DEVCFG1 >> PBCLK_START_INDEX) & PBCLK_REGISTER_MASK;
+
+	int valueBRG;
+
+	switch (PBCLK) {
+		case PBCLK_80MHz:
+			valueBRG = 0x186;
+			break;
+		case PBCLK_40MHz:
+			valueBRG = 0x0C2;
+			break;
+		case PBCLK_20MHz:
+			valueBRG = 0x060;
+			break;
+		case PBCLK_10MHz:
+			valueBRG = 0x02F;
+			break;
+	}
+
+	return valueBRG;
+}
+
+/*
+ * Lookups what value BRG should have for 100khz mode.
+ */
+int i2cbus_lookupBRG400(void) {
 	int PBCLK = (DEVCFG1 >> PBCLK_START_INDEX) & PBCLK_REGISTER_MASK;
 
 	int valueBRG;
@@ -66,17 +100,20 @@ int lookupBRG(void) {
 	return valueBRG;
 }
 
-void waitForMasterInterrupt(void) {
-	while(MASTER_INTERRUPT_1_READ == 0) {
-		MASTER_INTERRUPT_1_CLR;
-	}
+void i2cbus_clearMasterInterruptFlag(void) {
+	IFSCLR(0) = 0x80000000;
+}
+
+void i2cbus_waitForMasterInterrupt(void) {
+	while(MASTER_INTERRUPT_1_READ == 0) {}
+	i2cbus_clearMasterInterruptFlag();
 }
 
 /*=============================================================================
  * Interface methods
  */
 
-int init(void) {
+int i2cbus_init(void) {
 	//Check that we are in PREINIT state
 	if(state != PREINIT) {
 		return -1;
@@ -85,16 +122,15 @@ int init(void) {
 	//Start initialisation
 	state = INIT;
 
-	I2C1BRG = lookupBRG();
+	I2C1BRG = i2cbus_lookupBRG100();
 	ON_1_SET;
-	MASTER_INTERRUPT_1_CLR;
 
 	//Transition from INIT to IDLE
 	state = IDLE;
 	return 0;
 }
 
-int start(void) {
+int i2cbus_start(void) {
 	//Check that we are in IDLE state
 	if(state != IDLE) {
 		return -1;
@@ -105,14 +141,14 @@ int start(void) {
 	SEN_1_SET;
 
 	//Wait for the start event to finnish
-	waitForMasterInterrupt();
+	quicksleep(waitDuration);
 
 	//Transition from START to WAIT
 	state = WAIT;
 	return 0;
 }
 
-int restart(void) {
+int i2cbus_restart(void) {
 	//Check that we are in the WAIT state
 	if(state  != WAIT) {
 		return -1;
@@ -123,14 +159,14 @@ int restart(void) {
 	RSEN_1_SET;
 
 	//Wait for the restart event to finnish
-	waitForMasterInterrupt();
+	quicksleep(waitDuration);
 
 	//Transition from RESTART to WAIT
 	state = WAIT;
 	return 0;
 }
 
-int stop(void) {
+int i2cbus_stop(void) {
 	//Check that we are in WAIT state
 	if(state != WAIT) {
 		return -1;
@@ -141,14 +177,14 @@ int stop(void) {
 	PEN_1_SET;
 
 	//Wait for the stop event to finnish
-	waitForMasterInterrupt();
+	quicksleep(waitDuration);
 
 	//Transition from STOP to IDLE
 	state = IDLE;
 	return 0;
 }
 
-int send(char byte) {
+int i2cbus_send(char byte) {
 	//Check that we are in WAIT state
 	if(state != WAIT) {
 		return -1;
@@ -158,8 +194,14 @@ int send(char byte) {
 	state = SEND;
 	I2C1TRN = byte;
 
+	if(IWCOL_1_READ) {
+		IWCOL_1_CLR;
+		state = WAIT;
+		return -4;
+	}
+
 	//Wait for the transmition to finnish
-	waitForMasterInterrupt();
+	quicksleep(waitDuration);
 
 	//Transition from SEND to WAIT
 	state = WAIT;
@@ -171,7 +213,7 @@ int send(char byte) {
  *
  * Returns -1 if not in WAIT state, the byte received otherwise.
  */
-int receive(void) {
+int i2cbus_receive(void) {
 	//Check that we are in WAIT state
 	if(state != WAIT) {
 		return -1;
@@ -182,7 +224,7 @@ int receive(void) {
 	RCEN_1_SET;
 
 	//Wait for reception to finnish
-	waitForMasterInterrupt();
+	quicksleep(waitDuration);
 
 	//Transition from RECEIVE to WAIT
 	state = WAIT;
@@ -197,8 +239,7 @@ int receive(void) {
  * typeACK = 0 => ACK
  * typeACK = 1 => NACK
  */
-int generateACK(int typeACK) {
-	MASTER_INTERRUPT_1_CLR;
+int i2cbus_generateACK(int typeACK) {
 	//Check that we are in WAIT state
 	if(state != WAIT) {
 		return -1;
@@ -218,7 +259,7 @@ int generateACK(int typeACK) {
 	ACKEN_1_SET;
 
 	//Wait for acknowledge generation to finnish
-	waitForMasterInterrupt();
+	quicksleep(waitDuration);
 
 	//Transition from ACK to WAIT
 	state = WAIT;

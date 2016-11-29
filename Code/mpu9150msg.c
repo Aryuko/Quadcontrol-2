@@ -1,3 +1,11 @@
+/*
+ * A interface for sending messages to a MPU9150.
+ *
+ * For http://github.com/Zalodu/Quadcontrol-2
+ * Authors: Jesper Larsson (MrLarssonJr), Peter Kjellén (Zalodu)
+ * Date: 23/11/16
+ */
+
 #include <pic32mx.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -13,208 +21,138 @@
 
 char initialised = FALSE;
 
-int initIfNotAllready(void) {
+/*
+ * Initialise the I2C bus, if it isn't already.
+ */
+void mpu9150msg_initIfNotAllready(void) {
   if(!initialised) {
-    if(init()) {
-		return -1;
-	}
+    i2cbus_init();
     initialised = TRUE;
   }
-  return 0;
 }
 
 /*
- * Send a byte message over the I2C bus.
+ * Performs an Burst Write Sequence to a MPU9150 device.
  *
- * Returns -1 if a part of the message was not acknowledged, 1 otherwise.
+ * Returns 0 if successfull, -1 if not.
  */
-int sendMessage(char slaveAddress, char slaveRegister, char dataByte) {
-  initIfNotAllready();
+int mpu9150msg_repeatedSendMessage(char slaveAddress, char firstSlaveRegister, char dataBytes[], int length) {
+  mpu9150msg_initIfNotAllready();
 
-  start();
-
-  //Configure address byte for send mode
-  slaveAddress = slaveAddress & (~1);
-  send(slaveAddress);
-
-  if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return -1;
-  }
-
-  send(slaveRegister);
-
-  if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return -1;
-  }
-
-  send(dataByte);
-
-  if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return -1;
-  }
-
-  stop();
-  return 1;
-}
-
-int repeatedSendMessage(char slaveAddress, char firstSlaveRegister, char dataBytes[], int length) {
-  initIfNotAllready();
-
-  start();
+  i2cbus_start();
 
   //Configure address byte for send mode
-  slaveAddress = slaveAddress & (~1);
-  send(slaveAddress);
+  slaveAddress = slaveAddress << 1;
+  i2cbus_send(slaveAddress);
 
   if(ACKSTAT_1_READ == NACK) {
-    stop();
+    i2cbus_stop();
     return -1;
   }
 
-  send(firstSlaveRegister);
+  i2cbus_send(firstSlaveRegister);
 
   if(ACKSTAT_1_READ == NACK) {
-    stop();
+    i2cbus_stop();
     return -1;
   }
 
   int i;
   for(i = 0; i < length; ++i) {
-    send(dataBytes[i]);
+    i2cbus_send(dataBytes[i]);
 
     if(ACKSTAT_1_READ == NACK) {
-      stop();
+      i2cbus_stop();
       return -1;
     }
   }
 
-  stop();
-  return 1;
+  i2cbus_stop();
+  return 0;
 }
 
 /*
- * Receive a byte message over the I2C bus.
+ * Send a message byte to a MPU9150 device.
  *
- * Returns the byte received if successfull, -1 otherwise.
+ * Returns 0 if successfull, -1 if not.
  */
-int receiveMessage(char slaveAddress, char slaveRegister) {
-  initIfNotAllready();
+int mpu9150msg_sendMessage(char slaveAddress, char slaveRegister, char dataByte) {
+	char dataBytes[] = {dataByte};
 
-  int receivedByte;
-
-  start();
-
-  //Configure address byte for send mode
-  slaveAddress = (slaveAddress << 1);
-  send(slaveAddress);
-
-  if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return -1;
-  }
-
-  send(slaveRegister);
-
-  if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return -1;
-  }
-
-  restart();
-
-  //Configure address byte for receive mode
-  slaveAddress = slaveAddress | 1;
-  send(slaveAddress);
-
-  if(ACKSTAT_1_READ == NACK) {
-    stop();
-    return -1;
-  }
-
-  receivedByte = receive();
-
-  generateACK(NACK);
-
-  stop();
-
-  return receivedByte;
+	return mpu9150msg_repeatedSendMessage(slaveAddress, slaveRegister, dataBytes, 1);
 }
 
-int repeatedReceiveMessage(char slaveAddress, char slaveRegister, int* receivedBytes, int times) {
-  if(initIfNotAllready()) {
-	  return -1;
-  }
+/*
+ * Performs a Burst Read Sequence to a MPU9150 device.
+ *
+ * Returns 0 if successfull, -1 otherwise.
+ */
+int mpu9150msg_repeatedReceiveMessage(char slaveAddress, char slaveRegister, int* receivedBytes, int times) {
+  mpu9150msg_initIfNotAllready();
 
   int i;
   for(i = 0; i < times; ++i) {
     receivedBytes[i] = -1;
   }
 
-  if(start()) {
-	  return -2;
-  }
+  int status;
+
+  i2cbus_start();
 
   //Configure address byte for send mode
   slaveAddress = (slaveAddress << 1);
-  if(send(slaveAddress)) {
-	  return -3;
-  }
+  i2cbus_send(slaveAddress);
 
   if(ACKSTAT_1_READ == NACK) {
-    if(stop()) {
-		return -4;
-	}
+    i2cbus_stop();
     return 1;
   }
 
-  if(send(slaveRegister)) {
-	  return -5;
-  }
+  i2cbus_send(slaveRegister);
 
   if(ACKSTAT_1_READ == NACK) {
-	  if(stop()) {
-  		return -6;
-  	}
+	i2cbus_stop();
     return 2;
   }
 
-  if(restart()) {
-	  return -7;
-  }
+  i2cbus_restart();
 
   //Configure address byte for receive mode
   slaveAddress = slaveAddress | 1;
-  if(send(slaveAddress)) {
-	  return -8;
-  }
+  i2cbus_send(slaveAddress);
 
   if(ACKSTAT_1_READ == NACK) {
-	  if(stop()) {
-  		return -9;
-  	}
+	i2cbus_stop();
     return 3;
   }
 
   for(i = 0; i < times - 1; ++i) {
-    receivedBytes[i] = receive();
+    receivedBytes[i] = i2cbus_receive();
 
-    if(generateACK(ACK)) {
-		return -10;
-	}
+    i2cbus_generateACK(ACK);
   }
 
-  receivedBytes[times - 1] = receive();
+  receivedBytes[times - 1] = i2cbus_receive();
 
-  if(generateACK(NACK)) {
-	  return -11;
+  i2cbus_generateACK(NACK);
+
+  i2cbus_stop();
+
+  return 0;
+}
+
+/*
+ * Receive a message byte to a MPU9150 device.
+ *
+ * Returns 0 if successfull, -1 otherwise.
+ */
+int mpu9150msg_receiveMessage(char slaveAddress, char slaveRegister, int* receivedByte) {
+  int receivedBytes[1];
+
+  if (mpu9150msg_repeatedReceiveMessage(slaveAddress, slaveRegister, receivedBytes, 1)){
+	  return -1;
   }
 
-  if(stop()) {
-	  return -12;
-  }
-
+  *receivedByte = receivedBytes[0];
   return 0;
 }
