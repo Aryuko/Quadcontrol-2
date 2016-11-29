@@ -94,10 +94,10 @@ void labinit( void )
 	esc_init(NORMAL_START);
 	display_string(1, "done");
 
-	esc_setSpeed(MOTOR_FRONT, 0.25);
-	esc_setSpeed(MOTOR_REAR, 0.25);
-	esc_setSpeed(MOTOR_LEFT, 0.25);
-	esc_setSpeed(MOTOR_RIGHT, 0.25);
+	if(!mpu9150interface_notConnected) {
+		MPU9150_setup();
+		MPU9150_awaken();
+	}
 
 	return;
 }

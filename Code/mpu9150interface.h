@@ -8,6 +8,8 @@
 
 #pragma once
 
+int mpu9150interface_notConnected (void);
+
 int mpu9150interface_setup(void);
 
 int mpu9150interface_awaken(void);
