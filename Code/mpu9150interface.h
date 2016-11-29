@@ -8,14 +8,14 @@
 
 #pragma once
 
-int MPU9150_notConnected (void);
+int mpu9150interface_notConnected (void);
 
-int MPU9150_setup(void);
+int mpu9150interface_setup(void);
 
-int MPU9150_awaken(void);
+int mpu9150interface_awaken(void);
 
-int MPU9150_sleep(void);
+int mpu9150interface_sleep(void);
 
-int MPU9150_getAccelValues(double* values);
+int mpu9150interface_getAccelValues(double* values);
 
-int MPU9150_getGyroValues(double* values);
+int mpu9150interface_getGyroValues(double* values);

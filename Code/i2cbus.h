@@ -8,18 +8,16 @@
 
 #pragma once
 
-int state;
+int i2cbus_init(void);
 
-int init(void);
+int i2cbus_start(void);
 
-int start(void);
+int i2cbus_restart(void);
 
-int restart(void);
+int i2cbus_stop(void);
 
-int stop(void);
+int i2cbus_send(char byte);
 
-int send(char byte);
+int i2cbus_receive(void);
 
-int recive(void);
-
-int generateACK(int typeACK);
+int i2cbus_generateACK(int typeACK);

@@ -9,34 +9,37 @@
 #include <pic32mx.h>
 
 /*
- * Initialize Timer2 for use as period timer for pwm.
+ * Set a new duty cycle for the specified module.
+ *
+ * Parameter(s):
+ * module - specifies the module.
+ * dutyCycle - at what timer value the pinb should be driven low.
+ *
  */
-void pwm_initTimer();
+void pwm_setDutyCycle(int module, int dutyCycle);
+
+/*
+ * Initialize Timer2 for use as period timer for pwm.
+ *
+ * Parameter(s):
+ * period - timer period.
+ */
+void pwm_initTimer(int period);
 
 /*
  * Initialize the specified output compare module.
  *
- * Parameter:
+ * Parameter(s):
  * module - specifies module (1 <= module <= 4)
+ * initialDutyCycle - the initialDutyCycle (see pwm_setDutyCycle)
  */
-void pwm_initModule(int module);
+void pwm_initModule(int module, int initialDutyCycle);
 
 
 /*
  * Stop the specified output compare module.
  *
- * Parameter:
+ * Parameter(s):
  * module - specifies module (1 <= module <= 4)
  */
 void pwm_stopModule(int module);
-
-
-/*
- * Set a new duty cycle.
- *
- * parameter:
- * proportion - the proportion of the period the new duty cycle should be.
- *              (A value between 0 and 1.)
- *
- */
-void pwm_setDutyCycle(int module, double proportion);
