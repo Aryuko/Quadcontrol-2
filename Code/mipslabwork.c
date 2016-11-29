@@ -19,11 +19,12 @@ For copyright and licensing, see file COPYING */
 #include "i2caddresses.h"
 #include "mpu9150registers.h"
 #include "mpu9150interface.h"
+#include "esc.h"
 
 #define bool char
 
 int mytime = 0x5957;
-int timeoutcount = 0;
+double x = 0;
 
 char textstring[] = "text, more text, and even more text!";
 
@@ -35,9 +36,9 @@ void user_isr( void )
 {
 	// Reset interrupt flag
 	IFSCLR(0) = 0x100;
+	time_tick();
 
-	if(++timeoutcount == 10) {
-		timeoutcount = 0;
+	if(time_getElapsedTicks() % 400 == 0) {
 
 		time2string( textstring, mytime );
 		display_string( 3, textstring );
@@ -88,15 +89,15 @@ void labinit( void )
 	*((volatile int*) TRISD) |= 0x7F0;
 	*((volatile int*) TRISF) |= 2;
 
-	// Init timer using period = 8E06/256/10 = 31250, for 10 updates per second
-	initTimer2(31250);
 	enable_interrupts();
 
-	// Start Timer 2
-	T2CON |= 0x8000;
+	esc_init(NORMAL_START);
+	display_string(1, "done");
 
-	mpu9150interface_setup();
-	mpu9150interface_awaken();
+	esc_setSpeed(MOTOR_FRONT, 0.25);
+	esc_setSpeed(MOTOR_REAR, 0.25);
+	esc_setSpeed(MOTOR_LEFT, 0.25);
+	esc_setSpeed(MOTOR_RIGHT, 0.25);
 
 	return;
 }
@@ -104,20 +105,15 @@ void labinit( void )
 /* This function is called repetitively from the main program */
 void labwork( void )
 {
-/* Attempt at format conversion:
-
-	int accx = ~0 << 16;
-	accx = accx | ((accxh << 8) | accxl);
-*/
-	double values[3];
-	if(mpu9150interface_getAccelValues(values)) {
-		display_string(0, "it didn't work");
-	} else {
-		display_string(0, itoaconv((int)(values[0]+0.5)));
-		display_string(1, itoaconv((int)(values[1]+0.5)));
-		display_string(2, itoaconv((int)(values[2]+0.5)));
+	time_blockFor(100);
+	x += 0.0025;
+	if(x > 1) {
+		x = 0;
 	}
+	display_string(0, itoaconv(x * 10000));
 
-	display_update();
-	//quicksleep(8000000);
+	esc_setSpeed(MOTOR_FRONT, x);
+	esc_setSpeed(MOTOR_REAR, x);
+	esc_setSpeed(MOTOR_LEFT, x);
+	esc_setSpeed(MOTOR_RIGHT, x);
 }
