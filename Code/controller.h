@@ -9,8 +9,4 @@
 
 #pragma once
 
-void controller_step (double* targetGyroValues,
-                      double* targetAccelValues,
-                      double* actualGyroValues,
-                      double* actualAccelValues,
-                      double* resultingThrottle);
+void calculateStrategy (double* error, double* position, double* result);
