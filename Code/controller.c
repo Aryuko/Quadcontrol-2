@@ -7,6 +7,12 @@
  * Date: 27/11/16
  */
 
+/* PID constants */
+#define proportional 1
+#define integral 1
+#define derivative 1
+
+
  /*
   * Subtracts one "vector" (3-element array) from another and outputs the result
   * to the given "result" array.
