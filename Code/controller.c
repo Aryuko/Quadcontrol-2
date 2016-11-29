@@ -66,7 +66,7 @@ double calculateD (double error, double position) {
 void calculateStrategy (double* error, double* position, double* result) {
 	int i;
 	for (i = 0; i < 3; i++) {
-	result[i] = calculateP(error[i]) + calculateI(error[i]) + calculateD(error[i], position[i]);
+		result[i] = calculateP(error[i]) + calculateI(error[i]) + calculateD(error[i], position[i]);
 	}
 }
 
