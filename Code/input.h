@@ -18,8 +18,8 @@
 #define SW3 7
 #define SW4 8
 
-#define A0 9
+//#define A0 9
 
-int getInput (int input);
+int input_getInput (int input);
 
-void getAllInputs (int* values);
+void input_getAllInputs (int* values);

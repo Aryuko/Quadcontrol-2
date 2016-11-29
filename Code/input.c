@@ -13,24 +13,24 @@
 /*
  * Returns the value of the specified input. (See header file for definitions)
  */
-int getInput (int input) {
+int input_getInput (int input) {
   int value;
 
   if (input == BTN1) {
     //BTN 1 at RF1
     value = *((volatile int*) PORTF);
   }
-  else if (input < A0) {
+  else if (input <= SW4) {
     //BTN2 at RD5, BTN3 at RD6, BTN4 at RD7
     //SW1 at RD8, SW2 at RD9, SW3 at RD10, SW4 at RD11
     input += 3; //(to line it up with the RD registers, 2=>RD5, 6=>RD7 etc.)
     value = *((volatile int*) PORTD);
   }
-  else if (input == A0) {
+  /*else if (input == A0) {
     //Potentiometer at RB2
     input = 2; //(to line it up with RB2)
     value = *((volatile int*) PORTB);
-  }
+}*/
 
   int mask = 1 << input;
   return (value & mask) >> input;
@@ -40,7 +40,7 @@ int getInput (int input) {
 /*
  * Fills the specified array with the values of all inputs.
  */
-void getAllInputs (int* values) {
+void input_getAllInputs (int* values) {
   int value;
 
   //BTN 1 at RF1
