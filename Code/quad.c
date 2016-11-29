@@ -1,6 +1,8 @@
 #include "input.h"
 #include "esc.h"
+#include "vector.h"
 #include "mpu9150interface.h"
+#include "mpu9150ExtendedInterface.h"
 
 #define START_MODE_SWITCH SW1
 
@@ -19,8 +21,7 @@ void quad_init(void) {
 	//Init sensors
 	display_string(0, "init sensors");
 	display_update();
-	mpu9150interface_setup();
-	mpu9150interface_awaken();
+	mpu9150ExtendedInterface_init();
 
 	// Init ESCs depending on switch config
 	display_string(0, "init ESCs");
@@ -44,6 +45,21 @@ void quad_init(void) {
 	display_update();
 }
 
+/*
+ * Volatile functions used for testing purposes
+ */
+void quad_debug (void) {
+	if(mpu9150interface_notConnected()) {
+		display_string(0, "connection fail");
+		display_update();
+		mpu9150ExtendedInterface_init();
+	} else {
+		mpu9150ExtendedInterface_tick();
+		display_string(0, itoaconv(mpu9150ExtendedInterface_getInclination().x));
+	}
+}
+
 void quad_loop(void) {
 	// Do good stuffs
+	quad_debug();
 }
