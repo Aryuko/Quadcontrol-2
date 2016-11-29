@@ -20,6 +20,8 @@
 
 //#define A0 9
 
+void input_init(void);
+
 int input_getInput (int input);
 
 void input_getAllInputs (int* values);

@@ -11,6 +11,14 @@
 #include "input.h"
 
 /*
+ * Initialize the input pins.
+ */
+void input_init(void) {
+	TRISFSET = 0x2;
+	TRISDSET = 0xFE0;
+}
+
+/*
  * Returns the value of the specified input. (See header file for definitions)
  */
 int input_getInput (int input) {
