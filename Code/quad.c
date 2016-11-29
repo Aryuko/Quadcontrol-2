@@ -57,6 +57,18 @@ void quad_debug (void) {
 		mpu9150ExtendedInterface_tick();
 		display_string(0, itoaconv(mpu9150ExtendedInterface_getInclination().x));
 	}
+
+	time_blockFor(100);
+	x += 0.0025;
+	if(x > 1) {
+		x = 0;
+	}
+	display_string(0, itoaconv(x * 10000));
+
+	esc_setSpeed(MOTOR_FRONT, x);
+	esc_setSpeed(MOTOR_REAR, x);
+	esc_setSpeed(MOTOR_LEFT, x);
+	esc_setSpeed(MOTOR_RIGHT, x);
 }
 
 void quad_loop(void) {
