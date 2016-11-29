@@ -4,18 +4,76 @@
  *
  * For http://github.com/Zalodu/Quadcontrol-2
  * Author: Peter Kjellén (Zalodu)
- * Date: 27/11/16
+ * Date: 29/11/16
  */
 
 /* PID constants */
-#define proportional 1
-#define integral 1
-#define derivative 1
+#define proportionalGain 1.0
+#define integralGain 1.0
+#define derivativeGain 1.0
+#define derivativeDerivativeGain 1.0
+
+/* Integrator anti-windup */
+const double integratorMax = (1)/integralGain;
+const double integratorMin = (-1)/integralGain;
+
+/* Current integral value */
+double integratorState = 0.0;
+
+/* Last error */
+double derivatorState = 0.0;
+
+/*
+ * Returns a double calculated using the proportional constant.
+ */
+double calculateP (double error) {
+	return error * proportionalGain;
+}
+
+/*
+ * Returns a double calculated using the integral constant and the sum of past
+ * errors.
+ */
+double calculateI (double error) {
+	integratorState += error;
+
+	/* Apply anti-windup */
+	if(integratorState > integratorMax) { integratorState = integratorMax; }
+	else if(integratorState > integratorMin) { integratorState = integratorMin; }
+
+	return integratorState * integralGain;
+}
+
+/*
+ * Returns a double calculated using the derivate constant and the last error.
+ */
+double calculateD (double error, double position) {
+	double dTerm = derivativeDerivativeGain * (derivatorState - position);
+	derivatorState += dTerm;
+
+	return dTerm * derivativeGain;
+}
+
+/*
+ * Calculates a vector of doubles between 0 and 1 based on the
+ * vector of errors given as well as the vectors of positions.
+ *
+ * CURRENTLY LIMITED TO ONE DIMENSION
+ *
+ * Outputs the results to the given "result" array in the order of:
+ * FRONT, BACK, LEFT, RIGHT
+ */
+void calculateStrategy (double* error, double* position, double* result) {
+	int i;
+	for (i = 0; i < 3; i++) {
+	result[i] = calculateP(error[i]) + calculateI(error[i]) + calculateD(error[i], position[i]);
+	}
+}
 
 
  /*
-  * Subtracts one "vector" (3-element array) from another and outputs the result
-  * to the given "result" array.
+  * Subtracts one "vector" b (3-element array) from another "vector" a and
+  * outputs the result to the given "result" array.
   */
  void vectorSubtract (double* a, double* b, double* result) {
    result[0] = a[0] - b[0];
@@ -34,10 +92,10 @@
                      double* actualGyroValues,
                      double* actualAccelValues,
                      double* calculatedError) {
-   int gyroError[3];
+   double gyroError[3];
    vectorSubtract(targetGyroValues, actualGyroValues, gyroError);
 
-   int accelError[3];
+   double accelError[3];
    vectorSubtract(targetAccelValues, actualAccelValues, accelError);
 
    calculatedError[0] = gyroError[0];
@@ -58,6 +116,6 @@ void controller_step (double* targetGyroValues,
                       double* actualGyroValues,
                       double* actualAccelValues,
                       double* resultingThrottle) {
-      int error[6];
+      double error[6];
       calculateError(targetGyroValues, targetAccelValues, actualGyroValues, actualAccelValues, error);
 }
