@@ -12,30 +12,36 @@ void quad_init(void) {
 	quad_enableInterrupts();
 
 	// Init input
+	display_string(0, "init input");
+	display_update();
 	input_init();
-	display_string(0, "Initialized input");
 
 	//Init sensors
+	display_string(0, "init sensors");
+	display_update();
 	mpu9150interface_setup();
 	mpu9150interface_awaken();
-	display_string(0, "Initialized sensors");
 
 	// Init ESCs depending on switch config
+	display_string(0, "init ESCs");
+	display_update();
 	switch (input_getInput(START_MODE_SWITCH)) {
 		case 0: {
-			display_string(0, "Doing normal ESC start");
+			display_string(0, "ESC normal start");
+			display_update();
 			esc_init(NORMAL_START);
 			break;
 		}
 		case 1: {
-			display_string(0, "Setting throttle range on ESC start");
+			display_string(0, "ESC tRange start");
+			display_update();
 			esc_init(SET_THROTTLE_RANGE_START);
 			break;
 		}
 	}
-	display_string(0, "Initialized ESCs");
 
-	display_string(0, "Initialization done");
+	display_string(0, "init done");
+	display_update();
 }
 
 void quad_loop(void) {
