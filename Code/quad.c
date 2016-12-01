@@ -1,10 +1,36 @@
+#include <pic32mx.h>
 #include "input.h"
 #include "esc.h"
 #include "vector.h"
 #include "mpu9150interface.h"
 #include "mpu9150ExtendedInterface.h"
+#include "mpu9150msg.h"
+#include "mpu9150registers.h"
+#include "i2caddresses.h"
 
 #define START_MODE_SWITCH SW1
+
+int mytime = 0x5957;
+volatile int* portE = (volatile int*) 0xBF886110;
+char textstring[] = "text, more text, and even more text!";
+
+/* Interrupt Service Routine */
+void user_isr( void )
+{
+	// Reset interrupt flag
+	IFSCLR(0) = 0x100;
+	time_tick();
+
+	if(time_getElapsedTicks() % 400 == 0) {
+
+		time2string( textstring, mytime );
+		display_string( 3, textstring );
+		display_update();
+
+		tick( &mytime );
+		*portE += 1;
+	}
+}
 
 void quad_enableInterrupts(void) {
 	asm volatile("ei");
@@ -48,6 +74,7 @@ void quad_init(void) {
 /*
  * Volatile functions used for testing purposes
  */
+int x = 0;
 void quad_debug (void) {
 	if(mpu9150interface_notConnected()) {
 		display_string(0, "connection fail");
@@ -55,7 +82,13 @@ void quad_debug (void) {
 		mpu9150ExtendedInterface_init();
 	} else {
 		mpu9150ExtendedInterface_tick();
-		display_string(0, itoaconv(mpu9150ExtendedInterface_getInclination().x));
+		int valueL;
+		int valueH;
+		mpu9150msg_receiveMessage(MPU6150, GYRO_XOUT_L, &valueL);
+		mpu9150msg_receiveMessage(MPU6150, GYRO_XOUT_H, &valueH);
+		display_string(0, itoaconv(valueL));
+		display_string(1, itoaconv(valueH));
+		display_update();
 	}
 
 	time_blockFor(100);

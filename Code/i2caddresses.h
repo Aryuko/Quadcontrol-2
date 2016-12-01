@@ -9,6 +9,6 @@
 #pragma once
 
 // Sensor
-#define MPU6150 0x69
+#define MPU6150 0x68//69 for gabbes MPU, 68 for our
 // Magnetometer
 #define AK8975C 0x48

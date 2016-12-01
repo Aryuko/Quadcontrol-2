@@ -13,23 +13,11 @@ For copyright and licensing, see file COPYING */
 #include <stdint.h>   /* Declarations of uint_32 and the like */
 #include <pic32mx.h>  /* Declarations of system-specific addresses etc */
 #include "mipslab.h"  /* Declatations for these labs */
-#include "mpu9150msg.h"
-#include "i2cbus.h"
-#include "i2cmap.h"
-#include "i2caddresses.h"
-#include "mpu9150registers.h"
-#include "mpu9150interface.h"
-#include "esc.h"
 
-#define bool char
 
-int mytime = 0x5957;
-double x = 0;
 
-char textstring[] = "text, more text, and even more text!";
-
+#ifdef OLD
 volatile int* trisE = (volatile int*) 0xBF886100;
-volatile int* portE = (volatile int*) 0xBF886110;
 
 /* Interrupt Service Routine */
 void user_isr( void )
@@ -117,3 +105,4 @@ void labwork( void )
 	esc_setSpeed(MOTOR_LEFT, x);
 	esc_setSpeed(MOTOR_RIGHT, x);
 }
+#endif
