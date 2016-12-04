@@ -1,3 +1,5 @@
+#define LENGTH_OF_TICK 0.0025;
+
 unsigned int count = 0;
 
 /*
@@ -25,4 +27,8 @@ void time_blockFor(unsigned int ticks) {
  */
 unsigned int time_getElapsedTicks() {
 	return count;
+}
+
+double time_getLengthOfTick() {
+	return LENGTH_OF_TICK;
 }
