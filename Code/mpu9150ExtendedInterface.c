@@ -2,8 +2,7 @@
 #include "time.h"
 
 typedef struct {
-	//When
-	unsigned int time;
+	double time;
 	Vector3 value;
 } Measurement;
 
@@ -31,7 +30,7 @@ void mpu9150ExtendedInterface_init(void) {
  */
 void mpu9150ExtendedInterface_doMeasurement(void) {
 	//Declaration
-	unsigned int time;
+	double time;
 
 	Vector3 gyroValues;
 	Vector3 accelValues;
@@ -42,7 +41,7 @@ void mpu9150ExtendedInterface_doMeasurement(void) {
 	//Measuring
 	mpu9150interface_getGyroValues(gyroArray);
 	mpu9150interface_getAccelValues(accelArray);
-	time = time_getElapsedTicks();
+	time = time_getElapsedTicks() * time_getLengthOfTick();
 
 	//Ordering the data neatly
 	accelValues.x = accelArray[0];
@@ -77,7 +76,7 @@ void mpu9150ExtendedInterface_doMeasurement(void) {
  */
 void mpu9150ExtendedInterface_analysis(void) {
 	if(numberOfMeasurmentsDone > 1) {
-		double k = ((double) (latestAccel.time - secondLatestAccel.time)) / 2.0;
+		double k = (latestAccel.time - secondLatestAccel.time) / 2.0;
 
 		Vector3 deltaSpeed = vector_scalarProduct(k, vector_add(latestAccel.value, secondLatestAccel.value));
 		Vector3 deltaInclination = vector_scalarProduct(k, vector_add(latestGyro.value, secondLatestGyro.value));
