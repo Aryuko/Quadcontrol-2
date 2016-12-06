@@ -32,7 +32,7 @@ char accelScale = 3;
 int mpu9150interface_notConnected (void) {
 	int data;
 	if (mpu9150msg_receiveMessage(MPU6150, WHO_AM_I, &data)) { return -1; }
-	return -(data == 0x68);
+	return -(data == MPU6150);
 }
 
 /*
