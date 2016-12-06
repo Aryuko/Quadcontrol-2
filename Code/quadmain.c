@@ -3,6 +3,8 @@
 #include "quad.h"
 #include "mipslab.h"
 
+#define DEBUG
+
 int main(void) {
 	// Black magic initialization copied from mipslabmain
 	//==========================================================================
@@ -56,7 +58,11 @@ int main(void) {
 
 	while(1) {
 		// Run the quad step function continuously
+		#ifdef DEBUG
 		quad_loop();
+		#else
+		quad_debug();
+		#endif
 	}
 	return 0;
 }

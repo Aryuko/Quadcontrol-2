@@ -32,7 +32,7 @@ char accelScale = 3;
 int mpu9150interface_notConnected (void) {
 	int data;
 	if (mpu9150msg_receiveMessage(MPU6150, WHO_AM_I, &data)) { return -1; }
-	return -(data == 0x68);
+	return -(data == MPU6150);
 }
 
 /*
@@ -59,7 +59,7 @@ int mpu9150interface_setup (void) {
 	if(mpu9150msg_sendMessage(MPU6150, GYRO_CONFIG, sendData)) { return -1; }
 
 	//Setup accellerometer config
-	if (mpu9150msg_receiveMessage(MPU6150, POWER_MGMT_1, &data)) { return -1; }
+	if (mpu9150msg_receiveMessage(MPU6150, ACCEL_CONFIG, &data)) { return -1; }
 	sendData = (data & 0x18) | (accelScale << 3);
 	if(mpu9150msg_sendMessage(MPU6150, ACCEL_CONFIG, sendData)) { return -1; }
 }
