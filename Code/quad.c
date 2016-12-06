@@ -47,7 +47,9 @@ void quad_init(void) {
 	//Init sensors
 	display_string(0, "init sensors");
 	display_update();
-	mpu9150ExtendedInterface_init();
+	if(!mpu9150interface_notConnected()) {
+		mpu9150ExtendedInterface_init();
+	}
 
 	// Init ESCs depending on switch config
 	display_string(0, "init ESCs");
@@ -74,29 +76,28 @@ void quad_init(void) {
 /*
  * Volatile functions used for testing purposes
  */
-int x = 0;
+double x = 0;
 void quad_debug (void) {
 	if(mpu9150interface_notConnected()) {
-		display_string(0, "connection fail");
-		display_update();
 		mpu9150ExtendedInterface_init();
 	} else {
 		mpu9150ExtendedInterface_tick();
-		int valueL;
-		int valueH;
-		mpu9150msg_receiveMessage(MPU6150, GYRO_XOUT_L, &valueL);
-		mpu9150msg_receiveMessage(MPU6150, GYRO_XOUT_H, &valueH);
-		display_string(0, itoaconv(valueL));
-		display_string(1, itoaconv(valueH));
-		display_update();
+
+		display_string(0, itoaconv((int) (mpu9150ExtendedInterface_getInclinationDerivative().x + 0.5)));
+		display_string(1, itoaconv((int) (mpu9150ExtendedInterface_getInclinationDerivative().y + 0.5)));
+		display_string(2, itoaconv((int) (mpu9150ExtendedInterface_getInclinationDerivative().z + 0.5)));
 	}
 
+	display_update();
+
 	time_blockFor(100);
+
 	x += 0.0025;
-	if(x > 1) {
-		x = 0;
+	if(x > 1.0) {
+		x = 0.0;
 	}
-	display_string(0, itoaconv(x * 10000));
+
+	display_string(3, itoaconv((int) (x * 10000)));
 
 	esc_setSpeed(MOTOR_FRONT, x);
 	esc_setSpeed(MOTOR_REAR, x);
