@@ -16,3 +16,8 @@ void time_blockFor(unsigned int ticks);
  * Note that the ticks will wrap around when they overflow.
  */
 unsigned int time_getElapsedTicks();
+
+/*
+ * Get the length of a tick in seconds.
+ */
+double time_getLengthOfTick();
