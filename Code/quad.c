@@ -88,6 +88,7 @@ void quad_init(void) {
 double x = 0;
 void quad_debug (void) {
 	if(mpu9150ExtendedInterface_notConnected()) {
+		display_string(0, "Not connected");
 		mpu9150ExtendedInterface_init();
 	} else {
 		display_string(0, itoaconv((int) (mpu9150ExtendedInterface_getInclinationDerivative().x + 0.5)));
