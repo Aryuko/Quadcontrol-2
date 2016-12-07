@@ -102,7 +102,7 @@ void quad_init(void) {
 /*
  * Volatile functions used for testing purposes
  */
-double x = 0;
+double x = 0.1;
 void quad_debug (void) {
 	if(mpu9150ExtendedInterface_notConnected()) {
 		display_string(0, "Not connected");
@@ -118,6 +118,7 @@ void quad_debug (void) {
 	time_blockFor(100);
 
 	x += 0.0025;
+
 	if(x > 1.0) {
 		x = 0.0;
 	}
@@ -141,6 +142,28 @@ void quad_loop(void) {
 		lastTime = currentTime;
 
 		Vector3 inclination = mpu9150ExtendedInterface_getInclination();
+		Vector3 inclinationTarget = {.x = 0.0, .y = 0.0, .z = 0.0};
 
+		Vector3 result = calculateStrategy(inclinationController, inclinationTarget, inclination);
+
+		double throttle = 0.0;
+/*
+ 		//Full version:
+		double frontSpeed = throttle - result.x - result.z;
+		double rearSpeed 	= throttle + result.x - result.z;
+
+		double leftSpeed 	= throttle - result.y + result.z;
+		double rightSpeed = throttle + result.y + result.z;
+*/
+		//Reduced version:
+		double frontSpeed = throttle - result.x;
+		double rearSpeed 	= throttle + result.x;
+
+		esc_setSpeed(MOTOR_FRONT, frontSpeed);
+		esc_setSpeed(MOTOR_REAR, rearSpeed);
+/*
+		esc_setSpeed(MOTOR_LEFT, leftSpeed);
+		esc_setSpeed(MOTOR_RIGHT, rightSpeed);
+*/
 	}
 }
