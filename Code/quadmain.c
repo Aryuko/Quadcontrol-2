@@ -5,6 +5,10 @@
 
 #define DEBUG
 
+#ifdef DEBUG
+	#define DEBUG_SWITCH SW2
+#endif
+
 int main(void) {
 	// Black magic initialization copied from mipslabmain
 	//==========================================================================
@@ -59,9 +63,14 @@ int main(void) {
 	while(1) {
 		// Run the quad step function continuously
 		#ifdef DEBUG
-		quad_loop();
+			if (input_getInput(DEBUG_SWITCH)) {
+				quad_debug();
+			}
+			else {
+				quad_loop();
+			}
 		#else
-		quad_debug();
+			quad_loop();
 		#endif
 	}
 	return 0;
