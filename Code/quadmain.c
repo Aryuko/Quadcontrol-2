@@ -47,7 +47,7 @@ int main(void) {
 	display_string(0, "Awaiting orders");
 	display_string(1, "Quadcopter 2.0");
 	display_string(2, "By Jesper&Peter");
-	display_string(3, "TIME");
+	display_string(3, "For IS1500");
 	display_update();
 
 	display_image(96, icon);
