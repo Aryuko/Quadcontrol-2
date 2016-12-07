@@ -69,6 +69,21 @@
 #define OC4RSSET		PIC32_R (0x3628)
 #define OC4RSINV		PIC32_R (0x362c)
 
+#define OC5CON			PIC32_R (0x3800)
+#define OC5CONCLR		PIC32_R (0x3804)
+#define OC5CONSET		PIC32_R (0x3808)
+#define OC5CONINV		PIC32_R (0x380c)
+
+#define OC5R			PIC32_R (0x3810)
+#define OC5RCLR			PIC32_R (0x3814)
+#define OC5RSET			PIC32_R (0x3818)
+#define OC5RINV			PIC32_R (0x381c)
+
+#define OC5RS			PIC32_R (0x3820)
+#define OC5RSCLR		PIC32_R (0x3824)
+#define OC5RSSET		PIC32_R (0x3828)
+#define OC5RSINV		PIC32_R (0x382c)
+
 #include "pwm.h"
 
 /*
@@ -96,6 +111,9 @@ void pwm_setDutyCycle(int module, int dutyCycle) {
 		case 4: {
 			OC4RS = dutyCycle;
 			break;
+		}
+		case 5: {
+			OC5RS = dutyCycle;
 		}
 	}
 }
@@ -168,6 +186,16 @@ void pwm_initModule(int module, int initialDutyCycle) {
 			OC4CONSET = 0x8000; // Enable OC4
 			break;
 		}
+		case 5: {
+			OC5CON = 0x0000; // Turn off the OC4 when performing the setup
+			OC5CON = 0x0006; // Configure for PWM mode without Fault pin enabled
+
+			//init the duty cycle to 100% of the period
+			OC5R = initialDutyCycle; // Initialize primary Compare register
+			OC5RS = initialDutyCycle; // Initialize secondary Compare register
+			OC5CONSET = 0x8000; // Enable OC4
+			break;
+		}
 	}
 }
 
@@ -181,21 +209,24 @@ void pwm_initModule(int module, int initialDutyCycle) {
 void pwm_stopModule(int module) {
 	switch (module) {
 		case 1: {
-			OC1CON = 0x0000; // Turn off the OC1 when performing the setup
+			OC1CON = 0x0000; // Turn off the OC1
 			break;
 		}
 		case 2: {
-			OC2CON = 0x0000; // Turn off the OC2 when performing the setup
+			OC2CON = 0x0000; // Turn off the OC2
 			break;
 		}
 		case 3: {
-			OC2CON = 0x0000; // Turn off the OC3 when performing the setup
+			OC3CON = 0x0000; // Turn off the OC3
 			break;
 		}
 		case 4: {
-			OC2CON = 0x0000; // Turn off the OC4 when performing the setup
+			OC4CON = 0x0000; // Turn off the OC4
+			break;
+		}
+		case 5: {
+			OC5CON = 0x0000;
 			break;
 		}
 	}
-	OC1CON = 0x0000; // Turn off the OC1 when performing the setup
 }
