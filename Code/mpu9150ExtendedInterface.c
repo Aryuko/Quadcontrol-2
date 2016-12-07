@@ -1,5 +1,6 @@
 #include "vector.h"
 #include "time.h"
+#include "mpu9150interface.h"
 
 typedef struct {
 	double time;
@@ -16,6 +17,15 @@ unsigned int numberOfMeasurmentsDone = 0;
 
 Vector3 inclination;
 Vector3 speed;
+
+/*
+ * Checks if the MPU9150 is properly connected and is able to communicate
+ *
+ * Returns 0 if it works as expected, -1 if not
+ */
+ int mpu9150ExtendedInterface_notConnected (void) {
+	 return mpu9150interface_notConnected();
+ }
 
 /*
  * Initialize the MPU interface.
