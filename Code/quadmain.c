@@ -10,6 +10,8 @@
 	#define DEBUG_SWITCH SW2
 #endif
 
+#define SET_OFFSET_BUTTON BTN1
+
 int main(void) {
 	// Black magic initialization copied from mipslabmain
 	//==========================================================================
@@ -63,6 +65,9 @@ int main(void) {
 
 	while(1) {
 		// Run the quad step function continuously
+		if(input_getInput(SET_OFFSET_BUTTON)) {
+			mpu9150ExtendedInterface_setOffset();
+		}
 		#ifdef DEBUG
 			if (input_getInput(DEBUG_SWITCH)) {
 				quad_debug();
