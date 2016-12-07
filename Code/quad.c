@@ -2,7 +2,6 @@
 #include "input.h"
 #include "esc.h"
 #include "vector.h"
-#include "mpu9150interface.h"
 #include "mpu9150ExtendedInterface.h"
 #include "i2caddresses.h"
 #include "controller.h"
@@ -33,7 +32,7 @@ void user_isr( void )
 	// Reset interrupt flag
 	IFSCLR(0) = 0x100;
 	time_tick();
-	if(!mpu9150interface_notConnected()){
+	if(!mpu9150ExtendedInterface_notConnected()){
 		mpu9150ExtendedInterface_tick();
 	}
 
@@ -58,7 +57,7 @@ void quad_init(void) {
 	//Init sensors
 	display_string(0, "init sensors");
 	display_update();
-	if(!mpu9150interface_notConnected()) {
+	if(!mpu9150ExtendedInterface_notConnected()) {
 		mpu9150ExtendedInterface_init();
 	}
 
@@ -88,7 +87,7 @@ void quad_init(void) {
  */
 double x = 0;
 void quad_debug (void) {
-	if(mpu9150interface_notConnected()) {
+	if(mpu9150ExtendedInterface_notConnected()) {
 		mpu9150ExtendedInterface_init();
 	} else {
 		display_string(0, itoaconv((int) (mpu9150ExtendedInterface_getInclinationDerivative().x + 0.5)));
