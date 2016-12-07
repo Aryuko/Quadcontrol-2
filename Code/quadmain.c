@@ -2,6 +2,7 @@
 #include <pic32mx.h>
 #include "quad.h"
 #include "mipslab.h"
+#include "input.h"
 
 #define DEBUG
 

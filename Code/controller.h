@@ -9,4 +9,21 @@
 
 #pragma once
 
-void calculateStrategy (double* error, double* position, double* result);
+typedef struct {
+/* PID constants */
+	const double proportionalGain;
+  const double integralGain;
+	const double derivativeGain;
+	const double derivativeDerivativeGain;
+
+	/* Integrator anti-windup */
+	double integratorMax;
+	double integratorMin;
+
+	/* Current integral value */
+	double integratorState;
+	/* Last error */
+	double derivatorState;
+} ControllerState;
+
+Vector3 calculateStrategy (ControllerState state, Vector3 error, Vector3 position);

@@ -4,15 +4,28 @@
 #include "vector.h"
 #include "mpu9150interface.h"
 #include "mpu9150ExtendedInterface.h"
-#include "mpu9150msg.h"
-#include "mpu9150registers.h"
 #include "i2caddresses.h"
+#include "controller.h"
+#include "controller_constants.h"
 
 #define START_MODE_SWITCH SW1
 
-int mytime = 0x5957;
 volatile int* portE = (volatile int*) 0xBF886110;
 char textstring[] = "text, more text, and even more text!";
+
+ControllerState inclinationController = {
+		.proportionalGain = INCLINATION_PROPORTIONAL_GAIN,
+		.integralGain = INCLINATION_INTEGRAL_GAIN,
+		.derivativeGain = INCLINATION_DERIVATIVE_GAIN,
+		.derivativeDerivativeGain = INCLINATION_DERIVATIVE_DERIVATIVE_GAIN,
+
+		.integratorMax = INCLINATION_INTEGRATOR_MAX_CONST/INCLINATION_INTEGRAL_GAIN,
+		.integratorMin = INCLINATION_INTEGRATOR_MIN_CONST/INCLINATION_INTEGRAL_GAIN,
+
+		.integratorState = 0.0,
+
+		.derivatorState = 0.0
+	};
 
 /* Interrupt Service Routine */
 void user_isr( void )
@@ -20,6 +33,9 @@ void user_isr( void )
 	// Reset interrupt flag
 	IFSCLR(0) = 0x100;
 	time_tick();
+	if(!mpu9150interface_notConnected()){
+		mpu9150ExtendedInterface_tick();
+	}
 
 	if(time_getElapsedTicks() % 400 == 0) {
 		/* Increment value for leds */
@@ -63,7 +79,6 @@ void quad_init(void) {
 			break;
 		}
 	}
-
 	display_string(0, "init done");
 	display_update();
 }
@@ -76,8 +91,6 @@ void quad_debug (void) {
 	if(mpu9150interface_notConnected()) {
 		mpu9150ExtendedInterface_init();
 	} else {
-		mpu9150ExtendedInterface_tick();
-
 		display_string(0, itoaconv((int) (mpu9150ExtendedInterface_getInclinationDerivative().x + 0.5)));
 		display_string(1, itoaconv((int) (mpu9150ExtendedInterface_getInclinationDerivative().y + 0.5)));
 		display_string(2, itoaconv((int) (mpu9150ExtendedInterface_getInclinationDerivative().z + 0.5)));
@@ -100,7 +113,17 @@ void quad_debug (void) {
 	esc_setSpeed(MOTOR_RIGHT, x);
 }
 
+unsigned int lastTime = 0;
 void quad_loop(void) {
-	// Do good stuffs
-	quad_debug();
+	// Read values from MPU, send it through the controller and send new PWM
+	// values to ESCs
+
+	/* Check if time has updated, skip an iteration/do nothing if it hasn't */
+	unsigned int currentTime = time_getElapsedTicks();
+	if (currentTime > lastTime) {
+		lastTime = currentTime;
+
+		Vector3 inclination = mpu9150ExtendedInterface_getInclination();
+
+	}
 }
