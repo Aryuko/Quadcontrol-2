@@ -40,10 +40,13 @@ double calculateD (double derivativeGain, double derivativeDerivativeGain, doubl
 }
 
 /*
- * Calculates a vector of doubles between -1 and 1 based on the
- * target vector given as well as the vectors of the current position.
+ * Calculates a vector of doubles between preferable between 0 and 1 based
+ * on the target vector given as well as the vectors of the current position.
  *
- * Returns the result as a Vector3.
+ * Returns the result as a Vector3
+ * 		result.x: pitch
+ *		result.y: roll
+ *		result.z: yaw
  */
 Vector3 calculateStrategy (ControllerState state, Vector3 target, Vector3 position) {
 	Vector3 error = vector_subtract(position, target);
