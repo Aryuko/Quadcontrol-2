@@ -36,7 +36,7 @@ void user_isr( void )
 		mpu9150ExtendedInterface_tick();
 	}
 
-	if(time_getElapsedTicks() % 100 == 0) {
+	if(time_getElapsedTicks() % 50 == 0) {
 		/* Increment value for leds */
 		if (PORTE == 0x0) {
 			PORTE = 0x7;
@@ -46,7 +46,7 @@ void user_isr( void )
 			increasing = 1;
 			PORTE = PORTE << 1;
 		}
-		else if (PORTE == 0xE00) {
+		else if (PORTE == 0xE0) {
 			increasing = 0;
 			PORTE = PORTE >> 1;
 		}
