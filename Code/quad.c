@@ -9,7 +9,6 @@
 
 #define START_MODE_SWITCH SW1
 
-volatile int* portE = (volatile int*) 0xBF886110;
 char textstring[] = "text, more text, and even more text!";
 
 ControllerState inclinationController = {
@@ -27,6 +26,7 @@ ControllerState inclinationController = {
 	};
 
 /* Interrupt Service Routine */
+char increasing;
 void user_isr( void )
 {
 	// Reset interrupt flag
@@ -36,9 +36,26 @@ void user_isr( void )
 		mpu9150ExtendedInterface_tick();
 	}
 
-	if(time_getElapsedTicks() % 400 == 0) {
+	if(time_getElapsedTicks() % 100 == 0) {
 		/* Increment value for leds */
-		*portE += 1;
+		if (PORTE == 0x0) {
+			PORTE = 0x7;
+			increasing = 1;
+		}
+		else if (PORTE == 0x7) {
+			increasing = 1;
+			PORTE << 1;
+		}
+		else if (PORTE == 0xE00) {
+			increasing = 0;
+			PORTE >> 1;
+		}
+		else if (increasing) {
+			PORTE << 1;
+		}
+		else if (!increasing) {
+			PORTE >> 1;
+		}
 	}
 }
 
