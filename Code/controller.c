@@ -41,11 +41,12 @@ double calculateD (double derivativeGain, double derivativeDerivativeGain, doubl
 
 /*
  * Calculates a vector of doubles between -1 and 1 based on the
- * vector of errors given as well as the vectors of positions.
+ * target vector given as well as the vectors of the current position.
  *
- * Returns the results as a Vector3.
+ * Returns the result as a Vector3.
  */
-Vector3 calculateStrategy (ControllerState state, Vector3 error, Vector3 position) {
+Vector3 calculateStrategy (ControllerState state, Vector3 target, Vector3 position) {
+	Vector3 error = vector_subtract(position, target);
 	Vector3 result;
 
 	double p, i, d;
