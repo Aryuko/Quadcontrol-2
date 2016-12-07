@@ -22,12 +22,7 @@ void user_isr( void )
 	time_tick();
 
 	if(time_getElapsedTicks() % 400 == 0) {
-
-		time2string( textstring, mytime );
-		display_string( 3, textstring );
-		display_update();
-
-		tick( &mytime );
+		/* Increment value for leds */
 		*portE += 1;
 	}
 }
