@@ -44,17 +44,17 @@ void user_isr( void )
 		}
 		else if (PORTE == 0x7) {
 			increasing = 1;
-			PORTE << 1;
+			PORTE = PORTE << 1;
 		}
 		else if (PORTE == 0xE00) {
 			increasing = 0;
-			PORTE >> 1;
+			PORTE = PORTE >> 1;
 		}
 		else if (increasing) {
-			PORTE << 1;
+			PORTE = PORTE << 1;
 		}
 		else if (!increasing) {
-			PORTE >> 1;
+			PORTE = PORTE >> 1;
 		}
 	}
 }
