@@ -27,6 +27,17 @@ void mpu9150ExtendedInterface_setOffset() {
 	}
 }
 
+void mpu9150ExtendedInterface_resetInclination() {
+	inclination.x = 0.0;
+	inclination.y = 0.0;
+	inclination.z = 0.0;
+}
+
+void mpu9150ExtendedInterface_reset() {
+	mpu9150ExtendedInterface_setOffset();
+	mpu9150ExtendedInterface_resetInclination();
+}
+
 /*
  * Checks if the MPU9150 is properly connected and is able to communicate
  *
@@ -71,9 +82,6 @@ void mpu9150ExtendedInterface_doMeasurement(void) {
 	gyroValues.y = gyroArray[1];
 	gyroValues.z = gyroArray[2];
 
-	//Correct
-	gyroValues = vector_subtract(gyroValues, angularRotationOffset);
-
 	Measurement gyroMeasurement;
 	Measurement accelMeasurement;
 
@@ -101,7 +109,10 @@ void mpu9150ExtendedInterface_analysis(void) {
 		double k = (latestAccel.time - secondLatestAccel.time) / 2.0;
 
 		Vector3 deltaSpeed = vector_scalarProduct(k, vector_add(latestAccel.value, secondLatestAccel.value));
-		Vector3 deltaInclination = vector_scalarProduct(k, vector_add(latestGyro.value, secondLatestGyro.value));
+
+		Vector3 offsetGyroLatest = vector_subtract(latestGyro.value, angularRotationOffset);
+		Vector3 offsetGyroSecondLatest = vector_subtract(secondLatestGyro.value, angularRotationOffset);
+		Vector3 deltaInclination = vector_scalarProduct(k, vector_add(offsetGyroLatest, offsetGyroSecondLatest));
 
 		speed = vector_add(speed, deltaSpeed);
 		inclination = vector_add(inclination, deltaInclination);
@@ -116,6 +127,7 @@ void mpu9150ExtendedInterface_analysis(void) {
 	}
 }
 
+
 /*
  * Interface method to perform a measurment and analysis.
  */
@@ -128,7 +140,7 @@ void mpu9150ExtendedInterface_tick(void) {
  * Returns the latest gyro reading;
  */
 Vector3 mpu9150ExtendedInterface_getInclinationDerivative(void) {
-	return latestGyro.value;
+	return vector_subtract(latestGyro.value, angularRotationOffset);;
 }
 
 /*

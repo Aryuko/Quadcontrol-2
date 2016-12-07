@@ -66,7 +66,7 @@ int main(void) {
 	while(1) {
 		// Run the quad step function continuously
 		if(input_getInput(SET_OFFSET_BUTTON)) {
-			mpu9150ExtendedInterface_setOffset();
+			mpu9150ExtendedInterface_reset();
 		}
 		#ifdef DEBUG
 			if (input_getInput(DEBUG_SWITCH)) {
