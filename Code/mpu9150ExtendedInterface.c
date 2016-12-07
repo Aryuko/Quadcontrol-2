@@ -18,6 +18,15 @@ unsigned int numberOfMeasurmentsDone = 0;
 Vector3 inclination;
 Vector3 speed;
 
+Vector3 angularRotationOffset;
+Vector3 accelerationOffset;
+
+void mpu9150ExtendedInterface_setOffset() {
+	if(numberOfMeasurmentsDone < 2) {
+		angularRotationOffset = vector_scalarProduct(1.0/2.0, vector_add(latestGyro.value, secondLatestGyro.value));
+	}
+}
+
 /*
  * Checks if the MPU9150 is properly connected and is able to communicate
  *
@@ -61,6 +70,9 @@ void mpu9150ExtendedInterface_doMeasurement(void) {
 	gyroValues.x = gyroArray[0];
 	gyroValues.y = gyroArray[1];
 	gyroValues.z = gyroArray[2];
+
+	//Correct
+	gyroValues = vector_subtract(gyroValues, angularRotationOffset);
 
 	Measurement gyroMeasurement;
 	Measurement accelMeasurement;
