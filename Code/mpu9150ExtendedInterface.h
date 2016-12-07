@@ -1,3 +1,5 @@
+#pragma once
+
 int mpu9150ExtendedInterface_notConnected (void);
 
 void mpu9150ExtendedInterface_init(void);

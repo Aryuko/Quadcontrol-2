@@ -22,7 +22,7 @@ Vector3 angularRotationOffset;
 Vector3 accelerationOffset;
 
 void mpu9150ExtendedInterface_setOffset() {
-	if(numberOfMeasurmentsDone < 2) {
+	if(numberOfMeasurmentsDone >= 2) {
 		angularRotationOffset = vector_scalarProduct(1.0/2.0, vector_add(latestGyro.value, secondLatestGyro.value));
 	}
 }
