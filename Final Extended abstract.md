@@ -4,7 +4,8 @@ A second attempt at making software pilot a Quadcopter.
 
 *Date: 2016-12-09*
 
-*Authors: *
+
+*Authors:*
 
 * *Peter Kjellén, [pekj@kth.se](mailto:pekj@kth.se), 960130-4018*
 
@@ -60,7 +61,7 @@ Main loop and low level sensor I2C interface.
 
 PWM library, ESC PWM interface, I2C hardware interface, high level sensor I2C interface, and time library.
 
-**Peter: **
+**Peter:**
 
 PID controller, input interface (switches and buttons), and middle level sensor I2C interface.
 
