@@ -1,4 +1,12 @@
 /*
+ * A collection of functions for handling time for use with a timer.
+ *
+ * For http://github.com/Zalodu/Quadcontrol-2
+ * Author: Jesper Larsson (mrlarssonjr)
+ * Date: 15/12/16
+ */
+
+/*
  * Tick time.
  */
 void time_tick();

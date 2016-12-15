@@ -1,3 +1,11 @@
+/*
+ * The main function for the project.
+ *
+ * For http://github.com/Zalodu/Quadcontrol-2
+ * Author: Peter Kjellén (Zalodu), Jesper Larsson (mrlarssonjr)
+ * Date: 15/12/16
+ */
+
 #include <stdint.h>
 #include <pic32mx.h>
 #include "quad.h"

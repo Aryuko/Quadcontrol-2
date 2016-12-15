@@ -1,3 +1,11 @@
+/*
+ * A collection of functions for handling time for use with a timer.
+ *
+ * For http://github.com/Zalodu/Quadcontrol-2
+ * Author: Jesper Larsson (mrlarssonjr)
+ * Date: 15/12/16
+ */
+
 #define LENGTH_OF_TICK 0.0025;
 
 unsigned int count = 0;

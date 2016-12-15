@@ -1,3 +1,11 @@
+/*
+ * An extended interface for more specific use of the MPU9150.
+ *
+ * For http://github.com/Zalodu/Quadcontrol-2
+ * Author: Jesper Larsson (mrlarssonjr)
+ * Date: 15/12/16
+ */
+
 #pragma once
 
 int mpu9150ExtendedInterface_notConnected (void);

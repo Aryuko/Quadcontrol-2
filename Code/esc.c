@@ -1,3 +1,11 @@
+/*
+ * An interface to handle ESCs through PWM.
+ *
+ * For http://github.com/Zalodu/Quadcontrol-2
+ * Author: Jesper Larsson (mrlarssonjr)
+ * Date: 15/12/16
+ */
+
 //PWM timings
 #define MAX_THROTTLE 5000 //2ms
 #define MIN_THROTTLE 2500 //1ms

@@ -1,3 +1,11 @@
+/*
+ * An interface to handle ESCs through PWM.
+ *
+ * For http://github.com/Zalodu/Quadcontrol-2
+ * Author: Jesper Larsson (mrlarssonjr)
+ * Date: 15/12/16
+ */
+
 #define MOTOR_FRONT 1
 #define MOTOR_REAR 2
 #define MOTOR_LEFT 3
