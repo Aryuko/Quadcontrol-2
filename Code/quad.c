@@ -117,7 +117,7 @@ void quad_debug (void) {
 
 	time_blockFor(100);
 
-	x += 0.0025;
+	x += 0.005;
 	if(x > 1.0) {
 		x = 0.0;
 	}
