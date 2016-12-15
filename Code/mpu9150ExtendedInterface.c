@@ -1,3 +1,11 @@
+/*
+ * An extended interface for more specific use of the MPU9150.
+ *
+ * For http://github.com/Zalodu/Quadcontrol-2
+ * Author: Jesper Larsson (mrlarssonjr)
+ * Date: 15/12/16
+ */
+
 #include "vector.h"
 #include "time.h"
 #include "mpu9150interface.h"

@@ -1,3 +1,12 @@
+/*
+ * A type definition of a three dimensional vector, as well as a collection of
+ * functions for use with the Vector3 type.
+ *
+ * For http://github.com/Zalodu/Quadcontrol-2
+ * Author: Jesper Larsson (mrlarssonjr)
+ * Date: 15/12/16
+ */
+
 #include "vector.h"
 
 Vector3 vector_add(Vector3 a, Vector3 b) {
